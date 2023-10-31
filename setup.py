@@ -7,6 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/15hL6Yr9aUwd_nG_l4DjRAfMas1fp6Pha
 """
 
+!pip install --upgrade pip setuptools
 from setuptools import setup
 
 setup(
