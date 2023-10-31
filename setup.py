@@ -14,6 +14,6 @@ setup(
     version='0.1',
     packages=['minhas_funcoes'],
     install_requires=[
-        # Dependências do seu pacote, se houver
+        "numpy","pandas","matplotlib.pyplot","math","seaborn","statsmodels.api"
     ],
 )
