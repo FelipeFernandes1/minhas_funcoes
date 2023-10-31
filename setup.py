@@ -14,6 +14,6 @@ setup(
     version='0.1',
     packages=['minhas_funcoes'],
     install_requires=[
-        "numpy","pandas","matplotlib.pyplot","math","seaborn","statsmodels.api"
+        "numpy", "pandas", "seaborn", "statsmodels"
     ],
 )
