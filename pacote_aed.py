@@ -86,9 +86,9 @@ CONTAGEM DE VALORES NULOS/AUSENTES
 def tabela_iv(explicativa, resposta):
 
     if type(explicativa) != str:
-    num_bins = 1 + int(math.log2(len(explicativa))) 
-    explicativa = pd.cut(explicativa, bins=num_bins)
-    explicativa = explicativa.astype(str)
+        num_bins = 1 + int(math.log2(len(explicativa))) 
+        explicativa = pd.cut(explicativa, bins=num_bins)
+        explicativa = explicativa.astype(str)
 
   df_iv = pd.crosstab(explicativa, resposta)
   variavel_resposta = resposta.name
