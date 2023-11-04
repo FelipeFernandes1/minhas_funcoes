@@ -84,6 +84,10 @@ CONTAGEM DE VALORES NULOS/AUSENTES
 
 #Criando a função para calcular o Information Value
 def tabela_iv(explicativa, resposta, faixas=0):
+    
+    #temas
+  minha_paleta = ['royalblue','skyblue','lightsteelblue', 'cornflowerblue']
+  sns.set_palette(minha_paleta)
 
   if type(explicativa) != str and explicativa.nunique() > 15:
     plt.figure(figsize=(4, 3))
