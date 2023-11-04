@@ -86,6 +86,12 @@ CONTAGEM DE VALORES NULOS/AUSENTES
 def tabela_iv(explicativa, resposta, faixas=0):
 
   if type(explicativa) != str and explicativa.nunique() > 15:
+    plt.figure(figsize=(4, 3))
+    sns.boxplot(x=resposta, y=explicativa)
+    plt.xlabel(resposta.name)
+    plt.ylabel(explicativa.name)
+    plt.tight_layout()
+    plt.show()
     if faixas != 0:
       explicativa = pd.cut(explicativa, bins=faixas)
       explicativa = explicativa.astype(str)
