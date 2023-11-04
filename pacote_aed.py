@@ -114,6 +114,7 @@ def tabela_iv(explicativa, resposta, faixas=0):
   df_iv['Odds'] = df_iv['Valor_Um_relativo']/df_iv['Valor_Zero_relativo']
   df_iv['IV'] = (df_iv['Valor_Um_relativo']-df_iv['Valor_Zero_relativo'])* np.log(df_iv['Odds'])
   df_iv['IV'].replace(np.inf, 0, inplace=True)
+  df_iv = df_iv.sort_values(by='Taxa_Valor_Um')
   df_iv = df_iv.drop(columns=['Freq_absoluta','Freq_relativa','Valor_Um_relativo','Valor_Zero_relativo'])
   soma_iv = round(df_iv['IV'].sum(), 2)
 
