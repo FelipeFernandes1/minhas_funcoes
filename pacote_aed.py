@@ -83,12 +83,16 @@ CONTAGEM DE VALORES NULOS/AUSENTES
   plt.show()
 
 #Criando a função para calcular o Information Value
-def tabela_iv(explicativa, resposta):
+def tabela_iv(explicativa, resposta, faixas=0):
 
   if type(explicativa) != str and explicativa.nunique() > 15:
-    num_bins = 1 + int(math.log2(len(explicativa)))
-    explicativa = pd.cut(explicativa, bins=num_bins)
-    explicativa = explicativa.astype(str)
+    if faixas != 0:
+      explicativa = pd.cut(explicativa, bins=faixas)
+      explicativa = explicativa.astype(str)
+    else:
+      faixas = 1 + int(math.log2(len(explicativa)))
+      explicativa = pd.cut(explicativa, bins=faixas)
+      explicativa = explicativa.astype(str)
 
   df_iv = pd.crosstab(explicativa, resposta)
   variavel_resposta = resposta.name
