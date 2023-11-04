@@ -175,3 +175,17 @@ def person(variavel_A, variavel_B):
   plt.xlabel(variavel_A.name)
   plt.ylabel(variavel_B.name)
   plt.show()
+
+#Função para excluir os outliers de uam variável explicativa em realação a uma variável resposta
+def outliers(explicativa, resposta, dataframe):
+  for classe in range(0,2):
+    Q1 = np.percentile(explicativa[resposta==classe], 25)
+    Q3 = np.percentile(explicativa[resposta==classe], 75)
+    IQR = Q3 - Q1
+    limite_inferior = Q1 - 1.5 * IQR
+    limite_superior = Q3 + 1.5 * IQR
+
+    dataframe = dataframe[~((resposta==classe)&(explicativa< limite_inferior))]
+    dataframe = dataframe[~((resposta==classe)&(explicativa> limite_superior))]
+    dataframe.reset_index(drop=True, inplace=True)
+  return dataframe
