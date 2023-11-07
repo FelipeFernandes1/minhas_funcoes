@@ -245,9 +245,9 @@ def outliers(explicativa, resposta, dataframe):
 #Criando o ranking
 def ranking():
   global variavel, valor, coeficiente
-  df_ranking = pd.DataFrame({'Variável': [variavel],
-                             'Valor': [valor],
-                             'Coeficiente': [coeficiente]})
+  df_ranking = pd.DataFrame({'Variável': variavel,
+                             'Valor': valor,
+                             'Coeficiente': coeficiente})
   
   df_ranking = df_ranking.sort_values(by='Valor', ascending=False)
   return df_ranking
