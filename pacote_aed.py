@@ -152,7 +152,7 @@ CLASSIFICADO COMO: {benchmark}''')
   return soma_iv
 
 #Criando função para calcular o coeficiente de determinação
-def r_quadrado1(qualitativa, quantitativa):
+def r_quadrado(qualitativa, quantitativa):
     
   #Criando as listas para formar um ranking das variáveis
   global variavel, valor, coeficiente, resultado
