@@ -152,7 +152,7 @@ CLASSIFICADO COMO: {benchmark}''')
   return soma_iv
 
 #Criando função para calcular o coeficiente de determinação
-def r_quadrado(qualitativa, quantitativa):
+def r_quadrado1(qualitativa, quantitativa):
     
   #Criando as listas para formar um ranking das variáveis
   global variavel, valor, coeficiente, resultado
@@ -169,7 +169,8 @@ def r_quadrado(qualitativa, quantitativa):
   minha_paleta = ['royalblue','skyblue','lightsteelblue', 'cornflowerblue']
   sns.set_palette(minha_paleta)
 
-  variavel_dummie = sm.add_constant(qualitativa)
+  df = pd.get_dummies(qualitativa, drop_first=True)
+  variavel_dummie = sm.add_constant(df)
   modelo = sm.OLS(quantitativa, variavel_dummie).fit() #Cria um modelo de regressão linear simples
   r_squared = round(modelo.rsquared, 2) #Extrai o R²
 
