@@ -86,13 +86,15 @@ CONTAGEM DE VALORES NULOS/AUSENTES
 def tabela_iv(explicativa, resposta, faixas=0):
     
   #Criando as listas para formar um ranking das variáveis
-  global variavel, valor, coeficiente
+  global variavel, valor, coeficiente, resultado
   if 'variavel' not in locals() and 'variavel' not in globals():
     variavel = []
   if 'valor' not in locals() and 'valor' not in globals():
     valor = []
   if 'coeficiente' not in locals() and 'coeficiente' not in globals():
     coeficiente = []
+  if 'resultado' not in locals() and 'resultado' not in globals():
+    resultado = []
     
     #temas
   minha_paleta = ['royalblue','skyblue','lightsteelblue', 'cornflowerblue']
@@ -142,6 +144,7 @@ def tabela_iv(explicativa, resposta, faixas=0):
   variavel.append(explicativa.name)
   valor.append(benchmark)
   coeficiente.append('IV')
+  resultado.append(soma_iv)
 
   print(df_iv),print(f'''
 O INFORMATION VALUE TOTAL É: {soma_iv}
@@ -152,13 +155,15 @@ CLASSIFICADO COMO: {benchmark}''')
 def r_quadrado(qualitativa, quantitativa):
     
   #Criando as listas para formar um ranking das variáveis
-  global variavel, valor, coeficiente
+  global variavel, valor, coeficiente, resultado
   if 'variavel' not in locals() and 'variavel' not in globals():
     variavel = []
   if 'valor' not in locals() and 'valor' not in globals():
     valor = []
   if 'coeficiente' not in locals() and 'coeficiente' not in globals():
     coeficiente = []
+  if 'resultado' not in locals() and 'resultado' not in globals():
+    resultado = []
 
   #temas
   minha_paleta = ['royalblue','skyblue','lightsteelblue', 'cornflowerblue']
@@ -181,6 +186,7 @@ def r_quadrado(qualitativa, quantitativa):
   variavel.append(qualitativa.name)
   valor.append(benchmark)
   coeficiente.append('R²')
+  resultado.append(r_squared)
 
   print(f'''O COEFICIENTE DE DETERMINAÇÃO(R²) É: {r_squared}
 CLASSIFICADO COMO: {benchmark}''')
@@ -195,13 +201,15 @@ CLASSIFICADO COMO: {benchmark}''')
 def person(explicativa, resposta):
 
   #Criando as listas para formar um ranking das variáveis
-  global variavel, valor, coeficiente
+  global variavel, valor, coeficiente, resultado
   if 'variavel' not in locals() and 'variavel' not in globals():
     variavel = []
   if 'valor' not in locals() and 'valor' not in globals():
     valor = []
   if 'coeficiente' not in locals() and 'coeficiente' not in globals():
     coeficiente = []
+  if 'resultado' not in locals() and 'resultado' not in globals():
+    resultado = []
       
   correlacao = round(explicativa.corr(resposta), 2)
 
@@ -216,6 +224,7 @@ def person(explicativa, resposta):
   variavel.append(explicativa.name)
   valor.append(benchmark)
   coeficiente.append('Person')
+  resultado.append(correlacao)
 
   print(f"A CORRELAÇÃO DE PERSON ENTRE {explicativa.name.upper()} E {resposta.name.upper()} É: {correlacao}")
   print(f'CLASSIFICAÇÃO: {benchmark}')
@@ -244,10 +253,11 @@ def outliers(explicativa, resposta, dataframe):
 
 #Criando o ranking
 def ranking():
-  global variavel, valor, coeficiente
+  global variavel, valor, coeficiente, resultado
   df_ranking = pd.DataFrame({'Variável': variavel,
                              'Valor': valor,
+                             'Resultado': resultado,
                              'Coeficiente': coeficiente})
   
-  df_ranking = df_ranking.sort_values(by='Valor', ascending=False)
+  df_ranking = df_ranking.sort_values(by='resultado', ascending=False)
   return df_ranking
