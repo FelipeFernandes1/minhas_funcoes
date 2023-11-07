@@ -133,6 +133,7 @@ def tabela_iv(explicativa, resposta, faixas=0):
   print(df_iv),print(f'''
 O INFORMATION VALUE TOTAL É: {soma_iv}
 CLASSIFICADO COMO: {benchmark}''')
+  return soma_iv
 
 #Criando função para calcular o coeficiente de determinação
 def r_quadrado(qualitativa, quantitativa):
