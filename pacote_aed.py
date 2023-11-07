@@ -85,6 +85,15 @@ CONTAGEM DE VALORES NULOS/AUSENTES
 #Criando a função para calcular o Information Value
 def tabela_iv(explicativa, resposta, faixas=0):
     
+  #Criando as listas para formar um ranking das variáveis
+  global variavel, benchmark, coeficiente
+  if 'variavel' not in locals() and 'variavel' not in globals():
+    variavel = []
+  if 'benchmark' not in locals() and 'benchmark' not in globals():
+    benchmark = []
+  if 'coeficiente' not in locals() and 'coeficiente' not in globals():
+    coeficiente = []
+    
     #temas
   minha_paleta = ['royalblue','skyblue','lightsteelblue', 'cornflowerblue']
   sns.set_palette(minha_paleta)
@@ -130,6 +139,10 @@ def tabela_iv(explicativa, resposta, faixas=0):
   else:
     benchmark = 'MUITO FORTE'
 
+  variavel.append(explicativa.name)
+  benchmark.append(benchmark)
+  coeficiente.append('IV')
+
   print(df_iv),print(f'''
 O INFORMATION VALUE TOTAL É: {soma_iv}
 CLASSIFICADO COMO: {benchmark}''')
@@ -137,6 +150,15 @@ CLASSIFICADO COMO: {benchmark}''')
 
 #Criando função para calcular o coeficiente de determinação
 def r_quadrado(qualitativa, quantitativa):
+    
+  #Criando as listas para formar um ranking das variáveis
+  global variavel, benchmark, coeficiente
+  if 'variavel' not in locals() and 'variavel' not in globals():
+    variavel = []
+  if 'benchmark' not in locals() and 'benchmark' not in globals():
+    benchmark = []
+  if 'coeficiente' not in locals() and 'coeficiente' not in globals():
+    coeficiente = []
 
   #temas
   minha_paleta = ['royalblue','skyblue','lightsteelblue', 'cornflowerblue']
@@ -156,6 +178,10 @@ def r_quadrado(qualitativa, quantitativa):
   else:
     benchmark = 'MUITO FORTE'
 
+  variavel.append(qualitativa.name)
+  benchmark.append(benchmark)
+  coeficiente.append('R²')
+
   print(f'''O COEFICIENTE DE DETERMINAÇÃO(R²) É: {r_squared}
 CLASSIFICADO COMO: {benchmark}''')
   plt.figure(figsize=(4, 3))
@@ -166,8 +192,18 @@ CLASSIFICADO COMO: {benchmark}''')
   plt.show()
 
 #Função para calcular a correlação de Person
-def person(variavel_A, variavel_B):
-  correlacao = round(variavel_A.corr(variavel_B), 2)
+def person(explicativa, resposta):
+
+  #Criando as listas para formar um ranking das variáveis
+  global variavel, benchmark, coeficiente
+  if 'variavel' not in locals() and 'variavel' not in globals():
+    variavel = []
+  if 'benchmark' not in locals() and 'benchmark' not in globals():
+    benchmark = []
+  if 'coeficiente' not in locals() and 'coeficiente' not in globals():
+    coeficiente = []
+      
+  correlacao = round(explicativa.corr(resposta), 2)
 
   benchmark = ''
   if correlacao <= -0.7:
@@ -177,15 +213,19 @@ def person(variavel_A, variavel_B):
   else:
     benchmark = 'FORTEMENTE POSITIVA'
 
-  print(f"A CORRELAÇÃO DE PERSON ENTRE {variavel_A.name.upper()} E {variavel_B.name.upper()} É: {correlacao}")
+  variavel.append(explicativa.name)
+  benchmark.append(benchmark)
+  coeficiente.append('Person')
+
+  print(f"A CORRELAÇÃO DE PERSON ENTRE {explicativa.name.upper()} E {resposta.name.upper()} É: {correlacao}")
   print(f'CLASSIFICAÇÃO: {benchmark}')
   print('')
 
   #Plotando o gráfico de dispersão
   plt.figure(figsize=(4, 3))
-  sns.scatterplot(x=variavel_A, y=variavel_B)
-  plt.xlabel(variavel_A.name)
-  plt.ylabel(variavel_B.name)
+  sns.scatterplot(x=explicativa, y=resposta)
+  plt.xlabel(explicativa.name)
+  plt.ylabel(resposta.name)
   plt.show()
 
 #Função para excluir os outliers de uam variável explicativa em realação a uma variável resposta
