@@ -241,3 +241,13 @@ def outliers(explicativa, resposta, dataframe):
     dataframe = dataframe[~((resposta==classe)&(explicativa> limite_superior))]
     dataframe.reset_index(drop=True, inplace=True)
   return dataframe
+
+#Criando o ranking
+def ranking():
+  global variavel, benchmark, coeficiente
+  df_ranking = pd.DataFrame({'Variável': [variavel],
+                             'Valor': [benchmark],
+                             'Coeficiente': [coeficiente]})
+  
+  df_ranking = df_ranking.sort_values(by='Coeficiente', ascending=False)
+  return df_ranking
