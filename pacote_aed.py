@@ -130,7 +130,7 @@ def tabela_iv(explicativa, resposta, faixas=0):
   else:
     benchmark = 'MUITO FORTE'
 
-  return print(df_iv),print(f'''
+  print(df_iv),print(f'''
 O INFORMATION VALUE TOTAL É: {soma_iv}
 CLASSIFICADO COMO: {benchmark}''')
 
