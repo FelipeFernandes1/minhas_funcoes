@@ -259,5 +259,5 @@ def ranking():
                              'Resultado': resultado,
                              'Coeficiente': coeficiente})
   
-  df_ranking = df_ranking.sort_values(by='resultado', ascending=False)
+  df_ranking = df_ranking.sort_values(by='Resultado', ascending=False)
   return df_ranking
