@@ -86,11 +86,11 @@ CONTAGEM DE VALORES NULOS/AUSENTES
 def tabela_iv(explicativa, resposta, faixas=0):
     
   #Criando as listas para formar um ranking das variáveis
-  global variavel, benchmark, coeficiente
+  global variavel, valor, coeficiente
   if 'variavel' not in locals() and 'variavel' not in globals():
     variavel = []
-  if 'benchmark' not in locals() and 'benchmark' not in globals():
-    benchmark = []
+  if 'valor' not in locals() and 'valor' not in globals():
+    valor = []
   if 'coeficiente' not in locals() and 'coeficiente' not in globals():
     coeficiente = []
     
@@ -140,7 +140,7 @@ def tabela_iv(explicativa, resposta, faixas=0):
     benchmark = 'MUITO FORTE'
 
   variavel.append(explicativa.name)
-  benchmark.append(benchmark)
+  valor.append(benchmark)
   coeficiente.append('IV')
 
   print(df_iv),print(f'''
@@ -152,11 +152,11 @@ CLASSIFICADO COMO: {benchmark}''')
 def r_quadrado(qualitativa, quantitativa):
     
   #Criando as listas para formar um ranking das variáveis
-  global variavel, benchmark, coeficiente
+  global variavel, valor, coeficiente
   if 'variavel' not in locals() and 'variavel' not in globals():
     variavel = []
-  if 'benchmark' not in locals() and 'benchmark' not in globals():
-    benchmark = []
+  if 'valor' not in locals() and 'valor' not in globals():
+    valor = []
   if 'coeficiente' not in locals() and 'coeficiente' not in globals():
     coeficiente = []
 
@@ -179,7 +179,7 @@ def r_quadrado(qualitativa, quantitativa):
     benchmark = 'MUITO FORTE'
 
   variavel.append(qualitativa.name)
-  benchmark.append(benchmark)
+  valor.append(benchmark)
   coeficiente.append('R²')
 
   print(f'''O COEFICIENTE DE DETERMINAÇÃO(R²) É: {r_squared}
@@ -195,11 +195,11 @@ CLASSIFICADO COMO: {benchmark}''')
 def person(explicativa, resposta):
 
   #Criando as listas para formar um ranking das variáveis
-  global variavel, benchmark, coeficiente
+  global variavel, valor, coeficiente
   if 'variavel' not in locals() and 'variavel' not in globals():
     variavel = []
-  if 'benchmark' not in locals() and 'benchmark' not in globals():
-    benchmark = []
+  if 'valor' not in locals() and 'valor' not in globals():
+    valor = []
   if 'coeficiente' not in locals() and 'coeficiente' not in globals():
     coeficiente = []
       
@@ -214,7 +214,7 @@ def person(explicativa, resposta):
     benchmark = 'FORTEMENTE POSITIVA'
 
   variavel.append(explicativa.name)
-  benchmark.append(benchmark)
+  valor.append(benchmark)
   coeficiente.append('Person')
 
   print(f"A CORRELAÇÃO DE PERSON ENTRE {explicativa.name.upper()} E {resposta.name.upper()} É: {correlacao}")
@@ -244,10 +244,10 @@ def outliers(explicativa, resposta, dataframe):
 
 #Criando o ranking
 def ranking():
-  global variavel, benchmark, coeficiente
+  global variavel, valor, coeficiente
   df_ranking = pd.DataFrame({'Variável': [variavel],
-                             'Valor': [benchmark],
+                             'Valor': [valor],
                              'Coeficiente': [coeficiente]})
   
-  df_ranking = df_ranking.sort_values(by='Coeficiente', ascending=False)
+  df_ranking = df_ranking.sort_values(by='Valor', ascending=False)
   return df_ranking
