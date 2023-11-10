@@ -238,7 +238,7 @@ def person(explicativa, resposta):
   plt.ylabel(resposta.name)
   plt.show()
 
-#Função para excluir os outliers de uam variável explicativa em realação a uma variável resposta
+#Função para excluir os outliers de uam variável explicativa em realação a uma variável resposta binária
 def outliers(explicativa, resposta, dataframe):
   for classe in range(0,2):
     Q1 = np.percentile(explicativa[resposta==classe], 25)
