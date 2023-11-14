@@ -146,10 +146,12 @@ def tabela_iv(explicativa, resposta, faixas=0):
   coeficiente.append('IV')
   resultado.append(soma_iv)
 
+  df_iv2 = df_iv.reset_index()
+
   print(df_iv),print(f'''
 O INFORMATION VALUE TOTAL É: {soma_iv}
 CLASSIFICADO COMO: {benchmark}''')
-  return df_iv.reset_index()
+  return df_iv2
 
 #Criando função para calcular o coeficiente de determinação
 def r_quadrado(qualitativa, quantitativa):
