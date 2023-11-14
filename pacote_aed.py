@@ -240,15 +240,15 @@ def person(explicativa, resposta):
 #Função para excluir os outliers de uam variável explicativa em realação a uma variável resposta binária
 def outliers(explicativa, resposta, dataframe):
   for classe in range(0, 2):
-      explicativa_classe = explicativa[resposta == classe]
-      Q1 = np.percentile(explicativa_classe, 25)
-      Q3 = np.percentile(explicativa_classe, 75)
-      IQR = Q3 - Q1
-      limite_inferior = Q1 - 1.5 * IQR
-      limite_superior = Q3 + 1.5 * IQR
+    explicativa_classe = explicativa[resposta == classe]
+    Q1 = np.percentile(explicativa_classe, 25)
+    Q3 = np.percentile(explicativa_classe, 75)
+    IQR = Q3 - Q1
+    limite_inferior = Q1 - 1.5 * IQR
+    limite_superior = Q3 + 1.5 * IQR
 
-      outliers_indices = np.where((resposta == classe) & ((explicativa < limite_inferior) | (explicativa > limite_superior)))
-      dataframe = dataframe.drop(outliers_indices[0])
+    outliers_indices = np.where((resposta == classe) & ((explicativa < limite_inferior) | (explicativa > limite_superior)))
+    dataframe = dataframe.drop(outliers_indices[0])
 
   dataframe.reset_index(drop=True, inplace=True)
   return dataframe
