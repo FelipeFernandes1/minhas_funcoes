@@ -83,7 +83,7 @@ CONTAGEM DE VALORES NULOS/AUSENTES
   plt.show()
 
 #Criando a função para calcular o Information Value
-def tabela_iv1(explicativa, resposta, faixas=0):
+def tabela_iv(explicativa, resposta, faixas=0):
     
   #Criando as listas para formar um ranking das variáveis
   global variavel, valor, coeficiente, resultado
