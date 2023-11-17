@@ -100,6 +100,7 @@ def tabela_iv(explicativa, resposta, faixas=0):
   minha_paleta = ['royalblue','skyblue','lightsteelblue', 'cornflowerblue']
   sns.set_palette(minha_paleta)
 
+  numerica = ''
   if type(explicativa) != str and explicativa.nunique() > 15:
     numerica = 'Sim'
     plt.figure(figsize=(4, 3))
