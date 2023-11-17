@@ -151,6 +151,20 @@ def tabela_iv(explicativa, resposta, faixas=0):
   print(df_iv),print(f'''
 O INFORMATION VALUE TOTAL É: {soma_iv}
 CLASSIFICADO COMO: {benchmark}''')
+  if type(df_iv2.iloc[:,0]) == str or df_iv2.iloc[:,0].nunique() <= 15: 
+    if len(df_iv2.iloc[:,0].value_counts()) > 3:
+      #Plotando gráficos de barra
+      plt.figure(figsize=(5, 3))
+      sns.barplot(x=df_iv2.iloc[:,0].astype(str), y=df_iv2.iloc[:,3], edgecolor='black')
+      plt.xlabel(df_iv2.iloc[:,0].name)
+      plt.ylabel('Taxa(valor 1)')
+      plt.tight_layout()
+      plt.show()
+    else:
+      plt.figure(figsize=(3, 3))
+      plt.pie(df_iv2.iloc[:,3], labels=df_iv2.iloc[:,0], autopct='%1.1f%%', startangle=140)
+      plt.axis('equal')
+      plt.show()
   return df_iv2
 
 #Criando função para calcular o coeficiente de determinação
