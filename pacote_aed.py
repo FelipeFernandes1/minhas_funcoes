@@ -156,7 +156,7 @@ CLASSIFICADO COMO: {benchmark}''')
   if numerica != 'Sim': 
     #Plotando gráficos de barra
     plt.figure(figsize=(5, 3))
-    sns.barplot(x=df_iv2.iloc[:,0].astype(str), y=df_iv2.iloc[:,3], edgecolor='black')
+    sns.barplot(x=df_iv2.iloc[:,0].astype(str), y=df_iv2.iloc[:,3], palette=minha_paleta, edgecolor='black')
     plt.xlabel(df_iv2.iloc[:,0].name)
     plt.ylabel('Taxa(valor 1)')
     plt.tight_layout()
