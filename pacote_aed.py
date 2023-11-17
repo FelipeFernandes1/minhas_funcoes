@@ -152,7 +152,6 @@ def tabela_iv(explicativa, resposta, faixas=0):
 O INFORMATION VALUE TOTAL É: {soma_iv}
 CLASSIFICADO COMO: {benchmark}''')
   if type(explicativa) == str or explicativa.nunique() <= 15: 
-    len(df_iv2.iloc[:,0].value_counts()) > 3:
     #Plotando gráficos de barra
     plt.figure(figsize=(5, 3))
     sns.barplot(x=df_iv2.iloc[:,0].astype(str), y=df_iv2.iloc[:,3], edgecolor='black')
