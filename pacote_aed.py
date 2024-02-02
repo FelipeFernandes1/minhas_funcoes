@@ -251,18 +251,21 @@ def person(explicativa, resposta):
   plt.show()
 
 #Função para identificar os índices dos outliers de uma variável explicativa em realação a uma variável resposta binária
-def outliers(explicativa, resposta):
-  for classe in range(0, 2):
-    explicativa_classe = explicativa[resposta == classe]
-    Q1 = np.percentile(explicativa_classe, 25)
-    Q3 = np.percentile(explicativa_classe, 75)
-    IQR = Q3 - Q1
-    limite_inferior = Q1 - 1.5 * IQR
-    limite_superior = Q3 + 1.5 * IQR
+def outliers_2(explicativa, resposta):
+    outliers_indices = []
 
-    outliers_indices = np.where((resposta == classe) & ((explicativa < limite_inferior) | (explicativa > limite_superior))) 
-      
-  return outliers_indices
+    for classe in range(2): 
+        explicativa_classe = explicativa[resposta == classe]
+        Q1 = np.percentile(explicativa_classe, 25)
+        Q3 = np.percentile(explicativa_classe, 75)
+        IQR = Q3 - Q1
+        limite_inferior = Q1 - 1.5 * IQR
+        limite_superior = Q3 + 1.5 * IQR
+
+        outliers_indices_classe = np.where((resposta == classe) & ((explicativa_classe < limite_inferior) | (explicativa_classe > limite_superior)))
+        outliers_indices.extend(outliers_indices_classe[0])
+
+    return outliers_indices
 
 #Criando o ranking
 def ranking():
