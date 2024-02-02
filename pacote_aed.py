@@ -250,8 +250,8 @@ def person(explicativa, resposta):
   plt.ylabel(resposta.name)
   plt.show()
 
-#Função para excluir os outliers de uam variável explicativa em realação a uma variável resposta binária
-def outliers(explicativa, resposta, dataframe):
+#Função para identificar os índices dos outliers de uma variável explicativa em realação a uma variável resposta binária
+def outliers(explicativa, resposta):
   for classe in range(0, 2):
     explicativa_classe = explicativa[resposta == classe]
     Q1 = np.percentile(explicativa_classe, 25)
@@ -260,11 +260,9 @@ def outliers(explicativa, resposta, dataframe):
     limite_inferior = Q1 - 1.5 * IQR
     limite_superior = Q3 + 1.5 * IQR
 
-    outliers_indices = np.where((resposta == classe) & ((explicativa < limite_inferior) | (explicativa > limite_superior)))
-    dataframe = dataframe.drop(outliers_indices[0])
-
-  dataframe.reset_index(drop=True, inplace=True)
-  return dataframe
+    outliers_indices = np.where((resposta == classe) & ((explicativa < limite_inferior) | (explicativa > limite_superior))) 
+      
+  return outliers_indices
 
 #Criando o ranking
 def ranking():
