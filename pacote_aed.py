@@ -251,7 +251,7 @@ def person(explicativa, resposta):
   plt.show()
 
 #Função para identificar os índices dos outliers de uma variável explicativa em realação a uma variável resposta binária
-def outliers_2(explicativa, resposta):
+def outliers(explicativa, resposta):
     outliers_indices = []
 
     for classe in range(2): 
