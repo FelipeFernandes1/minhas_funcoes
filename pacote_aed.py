@@ -9,78 +9,100 @@ Original file is located at
 
 import pandas as pd
 import seaborn as sns
+sns.set_palette("deep")
 import matplotlib.pyplot as plt
 import math
 import numpy as np
 import statsmodels.api as sm
 
-#Função para analisar variáveis qualitativas
-def qualitativa(coluna):
-  #temas
-  minha_paleta = ['royalblue','skyblue','lightsteelblue', 'cornflowerblue']
-  sns.set_palette(minha_paleta)
+#Função que realiza uma análise univariada
+def analise_univariada(coluna):
+  """Está é um função para analisar uma variável por vez. 
+A análise leverá em conta se a variável é nominal, ordinal, discreta ou contínua,
+porém é necessário fazer o devido tratamento para que todas variáveis qualitativas
+sejam do tipo 'object'
+  """
+  if coluna.dtype == 'object':
+    #Tabela de frequencia
+    tabela = coluna.value_counts().reset_index()
+    nome_coluna = tabela.columns[1]
+    tabela = tabela.rename(columns={nome_coluna: 'frequencia_absoluta'})
+    tabela = tabela.rename(columns={'index': nome_coluna})
+    tabela['frequencia_relativa'] = tabela['frequencia_absoluta']/tabela['frequencia_absoluta'].sum()
+    tabela['frequencia_acumulada'] = tabela['frequencia_relativa'].cumsum()
+    variavel = tabela.columns[0]
+    print('TABELA DE FREQUÊNCIA')
+    print(' ')
+    print(tabela.to_string(index=False))
+    print(' ')
 
-  #Tabela de frequencia
-  tabela = coluna.value_counts().reset_index()
-  nome_coluna = tabela.columns[1]
-  tabela = tabela.rename(columns={nome_coluna: 'frequencia_absoluta'})
-  tabela = tabela.rename(columns={'index': nome_coluna})
-  tabela['frequencia_relativa'] = tabela['frequencia_absoluta']/tabela['frequencia_absoluta'].sum()
-  tabela['frequencia_acumulada'] = tabela['frequencia_relativa'].cumsum()
-  variavel = tabela.columns[0]
-  print('TABELA DE FREQUÊNCIA')
-  print(' ')
-  print(tabela.to_string(index=False))
-  print(' ')
-
-  #verificando valores nulos/ausentes
-  print(f'''CONTAGEM DE VALORES NULOS/AUSENTES
+    #verificando valores nulos/ausentes
+    print(f'''CONTAGEM DE VALORES NULOS/AUSENTES
 {len(coluna)-coluna.count()}''')
-  print(' ')
+    print(' ')
 
-  if len(coluna.value_counts()) > 3:
-    print('GRÁFICO DE BARRAS')
-    #Plotando gráficos de barra
-    plt.figure(figsize=(5, 3))
-    sns.barplot(x=tabela[variavel], y=tabela['frequencia_relativa'], palette=minha_paleta , edgecolor='black')
-    plt.xlabel(variavel)
-    plt.ylabel('frequencia_relativa')
-    plt.tight_layout()
-    plt.show()
+    if len(coluna.value_counts()) > 3:
+        print('GRÁFICO DE BARRAS')
+        # Plotando gráficos de barra
+        plt.figure(figsize=(5, 3))
+        sns.barplot(x=tabela[variavel], y=tabela['frequencia_relativa'], edgecolor='black')
+        plt.xlabel(variavel)
+        plt.ylabel('frequencia_relativa')
+        plt.tight_layout()
+        plt.show()
+    else:
+        print('GRÁFICO DE PIZZA')
+        # Definindo uma paleta de cores personalizada
+        plt.figure(figsize=(3, 3))
+        plt.pie(tabela['frequencia_relativa'], labels=tabela[variavel], autopct='%1.1f%%', startangle=140)
+        plt.axis('equal')
+        plt.show()
   else:
-    print('GRÁFICO DE PIZZA')
-    plt.figure(figsize=(3, 3))
-    plt.pie(tabela['frequencia_relativa'], labels=tabela[variavel], autopct='%1.1f%%', startangle=140)
-    plt.axis('equal')
-    plt.show()
+    if len(coluna.value_counts()) > 30:
+        # Analisando as medidas estatísticas
+        print(f'''MEDIDAS ESTATÍSTICAS
 
-#Função para analisar variáveis quantitativas
-def quantitativa(coluna):
-  #temas
-  minha_paleta = ['royalblue','skyblue','lightsteelblue', 'cornflowerblue']
-  sns.set_palette(minha_paleta)
-
-  #Analisando as medidas estatísticas
-  print(f'''MEDIDAS ESTATÍSTICAS
-
-  {coluna.describe()}
+{coluna.describe()}
 
 CONTAGEM DE VALORES NULOS/AUSENTES
-  {len(coluna)-coluna.count()}''')
-  print('')
-
-  print('HISTOGRAMA E BOXPLOT')
-  # Plotando histograma e boxplot
-  num_bins = 1 + int(math.log2(len(coluna))) # Calculando o número de bins usando a regra de Sturges
-  fig, axes = plt.subplots(1, 2, figsize=(6, 3))
-  sns.histplot(x=coluna, bins=num_bins, kde=False, ax=axes[0])
-  axes[0].set_ylabel('Frequência absoluta')
-  axes[0].set_xlabel(coluna.name)
-  sns.boxplot(y=coluna, ax=axes[1])
-  axes[1].set_xlabel(coluna.name)
-  axes[1].set_ylabel('')
-  plt.tight_layout()
-  plt.show()
+{len(coluna)-coluna.count()}''')
+        print('')
+        print('HISTOGRAMA E BOXPLOT')
+        # Definindo a paleta de cores globalmente
+        # Plotando histograma e boxplot
+        num_bins = 1 + int(math.log2(len(coluna))) # Calculando o número de bins usando a regra de Sturges
+        fig, axes = plt.subplots(1, 2, figsize=(6, 3))
+        sns.histplot(x=coluna, bins=num_bins, kde=False, ax=axes[0])
+        axes[0].set_ylabel('Frequência absoluta')
+        axes[0].set_xlabel(coluna.name)
+        sns.boxplot(y=coluna, ax=axes[1])
+        axes[1].set_xlabel(coluna.name)
+        axes[1].set_ylabel('')
+        plt.tight_layout()
+        plt.show()
+    else:
+        # Tabela de frequencia
+        tabela = coluna.value_counts().reset_index()
+        nome_coluna = tabela.columns[1]
+        tabela = tabela.rename(columns={nome_coluna: 'frequencia_absoluta'})
+        tabela = tabela.rename(columns={'index': nome_coluna})
+        tabela['frequencia_relativa'] = tabela['frequencia_absoluta']/tabela['frequencia_absoluta'].sum()
+        tabela['frequencia_acumulada'] = tabela['frequencia_relativa'].cumsum()
+        variavel = tabela.columns[0]
+        print('TABELA DE FREQUÊNCIA')
+        print(' ')
+        print(tabela.to_string(index=False))
+        print(' ')
+        print(f'''CONTAGEM DE VALORES NULOS/AUSENTES
+{len(coluna)-coluna.count()}''')
+        print(' ')
+        print('BOXPLOT')
+        fig, ax = plt.subplots(figsize=(3, 3))
+        sns.boxplot(y=coluna, ax=ax)
+        ax.set_xlabel(coluna.name)
+        ax.set_ylabel('')
+        plt.tight_layout()
+        plt.show()
 
 #Criando a função para calcular o Information Value
 def tabela_iv(explicativa, resposta, faixas=0):
