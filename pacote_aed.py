@@ -45,7 +45,7 @@ sejam do tipo 'object'
         print('GRÁFICO DE BARRAS')
         # Plotando gráficos de barra
         plt.figure(figsize=(5, 3))
-        sns.barplot(x=tabela[variavel], y=tabela['frequencia_relativa'], edgecolor='black', palette='deep')
+        sns.barplot(x=tabela['frequencia_relativa'], y=tabela[variavel], edgecolor='black', palette='deep')
         plt.xlabel(variavel)
         plt.ylabel('frequencia_relativa')
         plt.tight_layout()
