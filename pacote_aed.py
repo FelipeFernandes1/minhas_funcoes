@@ -58,52 +58,28 @@ sejam do tipo 'object'
         plt.axis('equal')
         plt.show()
   else:
-    if len(coluna.value_counts()) > 30:
-        # Analisando as medidas estatísticas
-        print(f'''MEDIDAS ESTATÍSTICAS
+      # Analisando as medidas estatísticas
+      print(f'''MEDIDAS ESTATÍSTICAS
 
 {coluna.describe()}
 
 CONTAGEM DE VALORES NULOS/AUSENTES
 {len(coluna)-coluna.count()}''')
-        print('')
-        print('HISTOGRAMA E BOXPLOT')
-        # Definindo a paleta de cores globalmente
-        # Plotando histograma e boxplot
-        num_bins = 1 + int(math.log2(len(coluna))) # Calculando o número de bins usando a regra de Sturges
-        fig, axes = plt.subplots(1, 2, figsize=(6, 3))
-        sns.histplot(x=coluna, bins=num_bins, kde=False, ax=axes[0])
-        axes[0].set_ylabel('Frequência absoluta')
-        axes[0].set_xlabel(coluna.name)
-        sns.boxplot(y=coluna, ax=axes[1])
-        axes[1].set_xlabel(coluna.name)
-        axes[1].set_ylabel('')
-        plt.tight_layout()
-        plt.show()
-    else:
-        # Tabela de frequencia
-        tabela = coluna.value_counts().reset_index()
-        nome_coluna = tabela.columns[1]
-        tabela = tabela.rename(columns={nome_coluna: 'frequencia_absoluta'})
-        tabela = tabela.rename(columns={'index': nome_coluna})
-        tabela['frequencia_relativa'] = tabela['frequencia_absoluta']/tabela['frequencia_absoluta'].sum()
-        tabela['frequencia_acumulada'] = tabela['frequencia_relativa'].cumsum()
-        variavel = tabela.columns[0]
-        print('TABELA DE FREQUÊNCIA')
-        print(' ')
-        print(tabela.to_string(index=False))
-        print(' ')
-        print(f'''CONTAGEM DE VALORES NULOS/AUSENTES
-{len(coluna)-coluna.count()}''')
-        print(' ')
-        print('BOXPLOT')
-        fig, ax = plt.subplots(figsize=(3, 3))
-        sns.boxplot(y=coluna, ax=ax)
-        ax.set_xlabel(coluna.name)
-        ax.set_ylabel('')
-        plt.tight_layout()
-        plt.show()
-
+      print('')
+      print('HISTOGRAMA E BOXPLOT')
+      # Definindo a paleta de cores globalmente
+      # Plotando histograma e boxplot
+      num_bins = 1 + int(math.log2(len(coluna))) # Calculando o número de bins usando a regra de Sturges
+      fig, axes = plt.subplots(1, 2, figsize=(6, 3))
+      sns.histplot(x=coluna, bins=num_bins, kde=False, ax=axes[0])
+      axes[0].set_ylabel('Frequência absoluta')
+      axes[0].set_xlabel(coluna.name)
+      sns.boxplot(y=coluna, ax=axes[1])
+      axes[1].set_xlabel(coluna.name)
+      axes[1].set_ylabel('')
+      plt.tight_layout()
+      plt.show()
+      
 #Criando a função para calcular o Information Value
 def tabela_iv(explicativa, resposta, faixas=0):
     
