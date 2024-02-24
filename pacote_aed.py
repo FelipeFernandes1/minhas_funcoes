@@ -81,7 +81,7 @@ CONTAGEM DE VALORES NULOS/AUSENTES
       plt.show()
 
 #FUNÇÃO PARA REALIZAR A ANÁLISE BIVARIADA
-def analise_bivariada(explicativa, resposta, faixas=0):
+def analise_bivariada_teste(explicativa, resposta, faixas=0):
   """Esta é uma função que analisa a correlação/associação entre uma variável explicativa e uma variável resposta.
 A técnicas utilizadas são Person, IV e R², a depender dos tipos de variáveis.
 Primeiro argumento informar a variável explicativa.
@@ -89,7 +89,7 @@ Segundo argumento informar a variável resposta. Se for binária precisa ser do 
 Terceiro argumento facultativo"""
 
 #Calculando a correlação de Person
-  if explicativa.dtype != 'object' and len(resposta.unique()) > 2:
+  if len(explicativa.unique()) > 2 and explicativa.dtype != 'object' and len(resposta.unique()) > 2:
     #calculando a correlação
     correlacao = round(explicativa.corr(resposta), 2)
     #classificando
@@ -178,10 +178,10 @@ CLASSIFICAÇÃO: {benchmark}''')
       plt.show()
 
 #Calculando o coeficiente de determinação(R²)
-  elif len(resposta.unique()) > 2 and len(explicativa.unique()) == 2:
+  elif len(resposta.unique()) > 2 and ((len(explicativa.unique()) == 2 or explicativa.dtype == 'object')):
     #Codificando a variável qualitativa e calculando o R²
-    df = pd.get_dummies(explicativa, drop_first=True)
-    variavel_dummie = sm.add_constant(df)
+    df_reg = pd.get_dummies(explicativa, drop_first=True)
+    variavel_dummie = sm.add_constant(df_reg)
     modelo = sm.OLS(resposta, variavel_dummie).fit() #Cria um modelo de regressão linear simples
     r_squared = round(modelo.rsquared, 2) #Extrai o R²
     #classificando
