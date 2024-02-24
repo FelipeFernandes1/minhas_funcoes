@@ -15,7 +15,7 @@ import math
 import numpy as np
 import statsmodels.api as sm
 
-#Função que realiza uma análise univariada
+#FUNÇÃO PARA REALIZAR A ANÁLISE UNIVARIADA
 def analise_univariada(coluna):
   """Está é um função para analisar uma variável por vez. 
 A análise leverá em conta se a variável é nominal, ordinal, discreta ou contínua,
@@ -79,175 +79,132 @@ CONTAGEM DE VALORES NULOS/AUSENTES
       axes[1].set_ylabel('')
       plt.tight_layout()
       plt.show()
-      
-#Criando a função para calcular o Information Value
-def tabela_iv(explicativa, resposta, faixas=0):
-    
-  #Criando as listas para formar um ranking das variáveis
-  global variavel, valor, coeficiente, resultado
-  if 'variavel' not in locals() and 'variavel' not in globals():
-    variavel = []
-  if 'valor' not in locals() and 'valor' not in globals():
-    valor = []
-  if 'coeficiente' not in locals() and 'coeficiente' not in globals():
-    coeficiente = []
-  if 'resultado' not in locals() and 'resultado' not in globals():
-    resultado = []
-    
-    #temas
-  minha_paleta = ['royalblue','skyblue','lightsteelblue', 'cornflowerblue']
-  sns.set_palette(minha_paleta)
 
-  numerica = ''
-  if type(explicativa) != str and explicativa.nunique() > 15:
-    numerica = 'Sim'
-    plt.figure(figsize=(4, 3))
-    sns.boxplot(x=resposta, y=explicativa)
-    plt.xlabel(resposta.name)
-    plt.ylabel(explicativa.name)
-    plt.tight_layout()
-    plt.show()
-    if faixas != 0:
-      explicativa = pd.cut(explicativa, bins=faixas)
-      explicativa = explicativa.astype(str)
+#FUNÇÃO PARA REALIZAR A ANÁLISE BIVARIADA
+def analise_bivariada(explicativa, resposta, faixas=0):
+  """Esta é uma função que analisa a correlação/associação entre uma variável explicativa e uma variável resposta.
+A técnicas utilizadas são Person, IV e R², a depender dos tipos de variáveis.
+Primeiro argumento informar a variável explicativa.
+Segundo argumento informar a variável resposta. Se for binária precisa ser do tipo int e conter os valores 0/1.
+Terceiro argumento facultativo"""
+
+#Calculando a correlação de Person
+  if explicativa.dtype != 'object' and len(resposta.unique()) > 2:
+    #calculando a correlação
+    correlacao = round(explicativa.corr(resposta), 2)
+    #classificando
+    benchmark = ''
+    if correlacao <= -0.7:
+      benchmark = 'FORTEMENTE NEGATIVA'
+    elif correlacao <= 0.6:
+      benchmark = 'FRACA'
     else:
-      faixas = 1 + int(math.log2(len(explicativa)))
-      explicativa = pd.cut(explicativa, bins=faixas)
-      explicativa = explicativa.astype(str)
+      benchmark = 'FORTEMENTE POSITIVA'
+    print(f"A CORRELAÇÃO DE PERSON É: {correlacao}")
+    print(f'CLASSIFICAÇÃO: {benchmark}')
+    print('')
+    #Plotando o gráfico de dispersão
+    cor_deep = sns.color_palette('deep')[0] 
+    plt.figure(figsize=(4, 3))
+    sns.scatterplot(x=explicativa, y=resposta, color=cor_deep)
+    plt.xlabel(explicativa.name)
+    plt.ylabel(resposta.name)
+    plt.show()
 
-  df_iv = pd.crosstab(explicativa, resposta)
-  variavel_resposta = resposta.name
-  df_iv['Freq_absoluta'] = df_iv[1] + df_iv[0]
-  df_iv['Freq_relativa'] = df_iv['Freq_absoluta']/df_iv['Freq_absoluta'].sum()
-  df_iv['Valor_Um_relativo'] = (df_iv[1]/df_iv[1].sum())
-  df_iv['Valor_Zero_relativo'] = (df_iv[0]/df_iv[0].sum())
-  df_iv['Taxa_Valor_Um'] = (df_iv[1]/df_iv['Freq_absoluta'])
-  df_iv['Odds'] = df_iv['Valor_Um_relativo']/df_iv['Valor_Zero_relativo']
-  df_iv['IV'] = (df_iv['Valor_Um_relativo']-df_iv['Valor_Zero_relativo'])* np.log(df_iv['Odds'])
-  df_iv['IV'].replace(np.inf, 0, inplace=True)
-  df_iv = df_iv.sort_values(by='Taxa_Valor_Um')
-  df_iv = df_iv.drop(columns=['Freq_absoluta','Freq_relativa','Valor_Um_relativo','Valor_Zero_relativo'])
-  soma_iv = round(df_iv['IV'].sum(), 2)
-
-  benchmark = ''
-  if soma_iv <= 0.02:
-     benchmark = 'MUITO FRACO'
-  elif soma_iv < 0.1:
-    benchmark = 'FRACO'
-  elif soma_iv < 0.3:
-    benchmark = 'MÉDIO'
-  elif soma_iv < 0.5:
-    benchmark = 'FORTE'
-  else:
-    benchmark = 'MUITO FORTE'
-
-  variavel.append(explicativa.name)
-  valor.append(benchmark)
-  coeficiente.append('IV')
-  resultado.append(soma_iv)
-
-  df_iv2 = df_iv.reset_index()
-
-  print(df_iv),print(f'''
+#Calculando o information value
+  elif len(resposta.unique()) == 2:
+    #Criando faixas se a variável for numérica
+    numerica = ''
+    if type(explicativa) != str and explicativa.nunique() > 15:
+      explicativa_num = explicativa #fazendo uma cópia da variável para o bloxplot
+      if faixas != 0:
+        explicativa = pd.cut(explicativa, bins=faixas)
+        explicativa = explicativa.astype(str)
+      else:
+        faixas = 1 + int(math.log2(len(explicativa)))
+        explicativa = pd.cut(explicativa, bins=faixas)
+        explicativa = explicativa.astype(str)
+      numerica = 'Sim'
+  #Criando a tabela IV
+    df_iv = pd.crosstab(explicativa, resposta)
+    variavel_resposta = resposta.name
+    df_iv['Freq_absoluta'] = df_iv[1] + df_iv[0]
+    df_iv['Freq_relativa'] = df_iv['Freq_absoluta']/df_iv['Freq_absoluta'].sum()
+    df_iv['Valor_Um_relativo'] = (df_iv[1]/df_iv[1].sum())
+    df_iv['Valor_Zero_relativo'] = (df_iv[0]/df_iv[0].sum())
+    df_iv['Taxa_Valor_Um'] = (df_iv[1]/df_iv['Freq_absoluta'])
+    df_iv['Odds'] = df_iv['Valor_Um_relativo']/df_iv['Valor_Zero_relativo']
+    df_iv['IV'] = (df_iv['Valor_Um_relativo']-df_iv['Valor_Zero_relativo'])* np.log(df_iv['Odds'])
+    df_iv['IV'].replace(np.inf, 0, inplace=True)
+    df_iv = df_iv.sort_values(by='Taxa_Valor_Um')
+    df_iv = df_iv.drop(columns=['Freq_absoluta','Freq_relativa','Valor_Um_relativo','Valor_Zero_relativo'])
+    soma_iv = round(df_iv['IV'].sum(), 2)
+  #classificando
+    benchmark = ''
+    if soma_iv <= 0.02:
+      benchmark = 'MUITO FRACO'
+    elif soma_iv < 0.1:
+      benchmark = 'FRACO'
+    elif soma_iv < 0.3:
+      benchmark = 'MÉDIO'
+    elif soma_iv < 0.5:
+      benchmark = 'FORTE'
+    else:
+      benchmark = 'MUITO FORTE'
+    #organizando a tabela
+    df_iv2 = df_iv.reset_index()
+    #Printando a tabela IV e o resultado
+    print('TABELA IV')
+    print('')
+    print(df_iv)
+    print(f'''
 O INFORMATION VALUE TOTAL É: {soma_iv}
-CLASSIFICADO COMO: {benchmark}''')
-  if numerica != 'Sim': 
-    #Plotando gráficos de barra
-    plt.figure(figsize=(5, 3))
-    sns.barplot(x=df_iv2.iloc[:,0].astype(str), y=df_iv2.iloc[:,3], palette=minha_paleta, edgecolor='black')
-    plt.xlabel(df_iv2.iloc[:,0].name)
-    plt.ylabel('Taxa(valor 1)')
+CLASSIFICAÇÃO: {benchmark}''')
+  #printando o gráfico
+    print('')
+    if numerica == 'Sim':
+      plt.figure(figsize=(4, 3))
+      sns.boxplot(x=resposta, y=explicativa_num, palette='deep')
+      plt.xlabel(resposta.name)
+      plt.ylabel(explicativa.name)
+      plt.tight_layout()
+      plt.show()
+    elif numerica != 'Sim': 
+      plt.figure(figsize=(5, 3))
+      sns.barplot(x=df_iv2.iloc[:,3], y=df_iv2.iloc[:,0].astype(str), edgecolor='black', palette='deep')
+      plt.xlabel('Taxa_Valor_Um')
+      plt.ylabel(df_iv2.iloc[:,0].name)
+      plt.tight_layout()
+      plt.show()
+
+#Calculando o coeficiente de determinação(R²)
+  elif len(resposta.unique()) > 2 and len(explicativa.unique()) == 2:
+    #Codificando a variável qualitativa e calculando o R²
+    df = pd.get_dummies(explicativa, drop_first=True)
+    variavel_dummie = sm.add_constant(df)
+    modelo = sm.OLS(resposta, variavel_dummie).fit() #Cria um modelo de regressão linear simples
+    r_squared = round(modelo.rsquared, 2) #Extrai o R²
+    #classificando
+    benchmark = ''
+    if r_squared <= 0.25:
+      benchmark = 'FRACO'
+    elif r_squared < 0.5:
+      benchmark = 'MÉDIO'
+    elif r_squared < 0.75:
+      benchmark = 'FORTE'
+    else:
+      benchmark = 'MUITO FORTE'
+  #Printando
+    print(f'''O COEFICIENTE DE DETERMINAÇÃO(R²) É: {r_squared}
+  CLASSIFICAÇÃO: {benchmark}''')
+    print('')
+    plt.figure(figsize=(len(explicativa.unique())+2, 3))
+    sns.boxplot(x=explicativa, y=resposta, palette='deep')
+    plt.xlabel(explicativa.name)
+    plt.ylabel(resposta.name)
     plt.tight_layout()
     plt.show()
-  return df_iv2
-
-#Criando função para calcular o coeficiente de determinação
-def r_quadrado(qualitativa, quantitativa):
-    
-  #Criando as listas para formar um ranking das variáveis
-  global variavel, valor, coeficiente, resultado
-  if 'variavel' not in locals() and 'variavel' not in globals():
-    variavel = []
-  if 'valor' not in locals() and 'valor' not in globals():
-    valor = []
-  if 'coeficiente' not in locals() and 'coeficiente' not in globals():
-    coeficiente = []
-  if 'resultado' not in locals() and 'resultado' not in globals():
-    resultado = []
-
-  #temas
-  minha_paleta = ['royalblue','skyblue','lightsteelblue', 'cornflowerblue']
-  sns.set_palette(minha_paleta)
-
-  df = pd.get_dummies(qualitativa, drop_first=True)
-  variavel_dummie = sm.add_constant(df)
-  modelo = sm.OLS(quantitativa, variavel_dummie).fit() #Cria um modelo de regressão linear simples
-  r_squared = round(modelo.rsquared, 2) #Extrai o R²
-
-  benchmark = ''
-  if r_squared <= 0.25:
-     benchmark = 'FRACO'
-  elif r_squared < 0.5:
-    benchmark = 'MÉDIO'
-  elif r_squared < 0.75:
-    benchmark = 'FORTE'
-  else:
-    benchmark = 'MUITO FORTE'
-
-  variavel.append(qualitativa.name)
-  valor.append(benchmark)
-  coeficiente.append('R²')
-  resultado.append(r_squared)
-
-  print(f'''O COEFICIENTE DE DETERMINAÇÃO(R²) É: {r_squared}
-CLASSIFICADO COMO: {benchmark}''')
-  plt.figure(figsize=(4, 3))
-  sns.boxplot(x=qualitativa, y=quantitativa)
-  plt.xlabel(qualitativa.name)
-  plt.ylabel(quantitativa.name)
-  plt.tight_layout()
-  plt.show()
-
-#Função para calcular a correlação de Person
-def person(explicativa, resposta):
-
-  #Criando as listas para formar um ranking das variáveis
-  global variavel, valor, coeficiente, resultado
-  if 'variavel' not in locals() and 'variavel' not in globals():
-    variavel = []
-  if 'valor' not in locals() and 'valor' not in globals():
-    valor = []
-  if 'coeficiente' not in locals() and 'coeficiente' not in globals():
-    coeficiente = []
-  if 'resultado' not in locals() and 'resultado' not in globals():
-    resultado = []
       
-  correlacao = round(explicativa.corr(resposta), 2)
-
-  benchmark = ''
-  if correlacao <= -0.7:
-     benchmark = 'FORTEMENTE NEGATIVA'
-  elif correlacao <= 0.6:
-    benchmark = 'FRACA'
-  else:
-    benchmark = 'FORTEMENTE POSITIVA'
-
-  variavel.append(explicativa.name)
-  valor.append(benchmark)
-  coeficiente.append('Person')
-  resultado.append(correlacao)
-
-  print(f"A CORRELAÇÃO DE PERSON ENTRE {explicativa.name.upper()} E {resposta.name.upper()} É: {correlacao}")
-  print(f'CLASSIFICAÇÃO: {benchmark}')
-  print('')
-
-  #Plotando o gráfico de dispersão
-  plt.figure(figsize=(4, 3))
-  sns.scatterplot(x=explicativa, y=resposta)
-  plt.xlabel(explicativa.name)
-  plt.ylabel(resposta.name)
-  plt.show()
-
 #Função para identificar os índices dos outliers de uma variável explicativa em realação a uma variável resposta binária
 def outliers(explicativa, resposta):
     outliers_indices = []
