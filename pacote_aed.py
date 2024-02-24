@@ -16,7 +16,7 @@ import numpy as np
 import statsmodels.api as sm
 
 #FUNÇÃO PARA REALIZAR A ANÁLISE UNIVARIADA
-def analise_univariada(coluna):
+def univariada(coluna):
   """Está é um função para analisar uma variável por vez. 
 A análise leverá em conta se a variável é nominal, ordinal, discreta ou contínua,
 porém é necessário fazer o devido tratamento para que todas variáveis qualitativas
@@ -81,7 +81,7 @@ CONTAGEM DE VALORES NULOS/AUSENTES
       plt.show()
 
 #FUNÇÃO PARA REALIZAR A ANÁLISE BIVARIADA
-def analise_bivariada_teste(explicativa, resposta, faixas=0):
+def bivariada(explicativa, resposta, faixas=0):
   """Esta é uma função que analisa a correlação/associação entre uma variável explicativa e uma variável resposta.
 A técnicas utilizadas são Person, IV e R², a depender dos tipos de variáveis.
 Primeiro argumento informar a variável explicativa.
