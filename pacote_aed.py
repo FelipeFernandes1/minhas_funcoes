@@ -85,7 +85,7 @@ def bivariada(explicativa, resposta, faixas=0):
   """Esta é uma função que analisa a correlação/associação entre uma variável explicativa e uma variável resposta.
 A técnicas utilizadas são Person, IV e R², a depender dos tipos de variáveis.
 Primeiro argumento informar a variável explicativa.
-Segundo argumento informar a variável resposta. Se for binária precisa ser do tipo int e conter os valores 0/1.
+Segundo argumento informar a variável resposta(Se for binária precisa ser do tipo int e conter os valores 0/1).
 Terceiro argumento facultativo"""
 
 #Calculando a correlação de Person
@@ -205,8 +205,12 @@ CLASSIFICAÇÃO: {benchmark}''')
     plt.tight_layout()
     plt.show()
       
-#Função para identificar os índices dos outliers de uma variável explicativa em realação a uma variável resposta binária
+#FUNÇÃO PARA IDENTIFICAR OS ÍNDICES DOS OUTLIERS EM REFERÊNCIA A UMA VARIÁVEL RESPOSTA BINÁRIA
 def outliers(explicativa, resposta):
+    """Está é uma função que retorna os índices considerados outliers em relação a uma variável binária.
+    É necessário atribuir o retorno a uma variável, para obter os ídices.
+    primeiro argumento > variável explicativa
+    segundo argumento > variável resposta"""
     outliers_indices = []
 
     for classe in range(2): 
@@ -222,13 +226,113 @@ def outliers(explicativa, resposta):
 
     return outliers_indices
 
-#Criando o ranking
-def ranking():
-  global variavel, valor, coeficiente, resultado
-  df_ranking = pd.DataFrame({'Variável': variavel,
+#FUNÇÃO PARA CONSTRUIR UM RANKING DE ASSOCIAÇÃO/CORRELAÇÃO ENTRE AS VARIÁVEIS EXPLICATIVAS E A VARIÁVEL RESPOSTA
+def ranking(df, resposta, faixas=0):
+  """Esta função retorna uma tabela com um ranking de associação/correlação.
+  primeiro argumento > dataframe
+  segundo argumento > variável resposta(Se for binária precisa ser do tipo int e conter os valores 0/1).
+  terceiro argumento > faixas(facultativo)"""
+  #criando uma cópia do df para não alterar o original
+  df_funcao = df.copy()
+  #criando as listas para armazenar os resulados
+  valor = []
+  tecnica = []
+  variavel = []
+  classificacao = []
+  #Iterando entre todas colunas e a variável resposta
+  for explicativa in df_funcao.columns:
+    #Calculando a correlação de Person
+    if len(df_funcao[explicativa].unique()) > 2 and df_funcao[explicativa].dtype != 'object' and len(resposta.unique()) > 2:
+      #calculando a correlação
+      correlacao = round(df_funcao[explicativa].corr(resposta), 2)
+      #classificando
+      benchmark = ''
+      if correlacao <= -0.7:
+        benchmark = 'FORTE'
+      elif correlacao <= 0.6:
+        benchmark = 'FRACO'
+      else:
+        benchmark = 'FORTE'
+      #armazenando o resultado
+      variavel.append(explicativa)
+      tecnica.append('Person')
+      valor.append(correlacao)
+      classificacao.append(benchmark)
+    #Calculando o information value
+    elif len(resposta.unique()) == 2:
+      #Criando faixas se a variável for numérica
+      numerica = ''
+      if type(df_funcao[explicativa]) != str and df_funcao[explicativa].nunique() > 15:
+        if faixas != 0:
+          df_funcao[explicativa] = pd.cut(df_funcao[explicativa], bins=faixas)
+          df_funcao[explicativa] = df_funcao[explicativa].astype(str)
+        else:
+          faixas = 1 + int(math.log2(len(df[explicativa])))
+          df_funcao[explicativa] = pd.cut(df_funcao[explicativa], bins=faixas)
+          df_funcao[explicativa] = df_funcao[explicativa].astype(str)
+        numerica = 'Sim'
+    #Criando a tabela IV
+      df_iv = pd.crosstab(df_funcao[explicativa], resposta)
+      variavel_resposta = resposta.name
+      df_iv['Freq_absoluta'] = df_iv[1] + df_iv[0]
+      df_iv['Freq_relativa'] = df_iv['Freq_absoluta']/df_iv['Freq_absoluta'].sum()
+      df_iv['Valor_Um_relativo'] = (df_iv[1]/df_iv[1].sum())
+      df_iv['Valor_Zero_relativo'] = (df_iv[0]/df_iv[0].sum())
+      df_iv['Taxa_Valor_Um'] = (df_iv[1]/df_iv['Freq_absoluta'])
+      df_iv['Odds'] = df_iv['Valor_Um_relativo']/df_iv['Valor_Zero_relativo']
+      df_iv['IV'] = (df_iv['Valor_Um_relativo']-df_iv['Valor_Zero_relativo'])* np.log(df_iv['Odds'])
+      df_iv['IV'].replace(np.inf, 0, inplace=True)
+      df_iv = df_iv.sort_values(by='Taxa_Valor_Um')
+      df_iv = df_iv.drop(columns=['Freq_absoluta','Freq_relativa','Valor_Um_relativo','Valor_Zero_relativo'])
+      soma_iv = round(df_iv['IV'].sum(), 2)
+    #classificando
+      benchmark = ''
+      if soma_iv <= 0.02:
+        benchmark = 'MUITO FRACO'
+      elif soma_iv < 0.1:
+        benchmark = 'FRACO'
+      elif soma_iv < 0.3:
+        benchmark = 'MÉDIO'
+      elif soma_iv < 0.5:
+        benchmark = 'FORTE'
+      else:
+        benchmark = 'MUITO FORTE'
+      #armazenando o resultado
+      variavel.append(explicativa)
+      tecnica.append('IV')
+      valor.append(soma_iv)
+      classificacao.append(benchmark)
+    #Calculando o coeficiente de determinação(R²)
+    elif len(resposta.unique()) > 2 and ((len(df_funcao[explicativa].unique()) == 2 or df_funcao[explicativa].dtype == 'object')):
+      #Codificando a variável qualitativa e calculando o R²
+      df_reg = pd.get_dummies(df_funcao[explicativa], drop_first=True)
+      variavel_dummie = sm.add_constant(df_reg)
+      modelo = sm.OLS(resposta, variavel_dummie).fit() #Cria um modelo de regressão linear simples
+      r_squared = round(modelo.rsquared, 2) #Extrai o R²
+      #classificando
+      benchmark = ''
+      if r_squared <= 0.25:
+        benchmark = 'FRACO'
+      elif r_squared < 0.5:
+        benchmark = 'MÉDIO'
+      elif r_squared < 0.75:
+        benchmark = 'FORTE'
+      else:
+        benchmark = 'MUITO FORTE'
+    #armazenando o resultado
+      variavel.append(explicativa)
+      tecnica.append('R²')
+      valor.append(r_squared)
+      classificacao.append(benchmark)
+  #Printando o ranking
+  df_ranking = pd.DataFrame({'Posição':'' ,
+                            'Variável': variavel,
                              'Valor': valor,
-                             'Resultado': resultado,
-                             'Coeficiente': coeficiente})
-  
-  df_ranking = df_ranking.sort_values(by='Resultado', ascending=False)
+                             'Classificação': classificacao,
+                             'Técnica': tecnica})
+  ordem = {'MUITO FORTE': 1, 'FORTE': 2, 'MÉDIO': 3, 'FRACO': 4, 'MUITO FRACO': 5}
+  df_ranking['Posição'] = df_ranking['Classificação'].map(ordem)
+  df_ranking = df_ranking.sort_values(by=['Posição','Valor'], ascending=[True, False])
+  df_ranking.drop(columns=['Posição'], inplace=True)
+  df_ranking.reset_index(inplace=True, drop=True)
   return df_ranking
