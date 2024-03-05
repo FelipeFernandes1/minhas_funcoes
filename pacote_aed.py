@@ -336,3 +336,32 @@ def ranking(df, resposta, faixas=0):
   df_ranking.drop(columns=['Posição'], inplace=True)
   df_ranking.reset_index(inplace=True, drop=True)
   return df_ranking
+
+#FUNÇÃO PARA REALIZAR ANÁLISE COMBINATÓRIA
+def combinatoria(elementos, posicoes, ordem_importa, tem_repeticao):
+  """Função para calcular a análise combinatória, sendo permutação, arranjo ou combinação.
+  É útil para utilizar na probabilidade clássica.
+  n > número de elementos possíveis
+  r > número de posições
+  ordem_importa > 'sim'/'nao' indica se a ordem das disposições importa
+  repeticao = 'sim'/'nao' indica se pode haver repetição dos elementos"""
+  if tem_repeticao == 'nao':
+    if ordem_importa != "sim": #combinação sem repetição
+      resultado = math.factorial(elementos) / (math.factorial(posicoes) * math.factorial(elementos - posicoes))
+      print(f'O resultado é {int(resultado)} combinações possíveis.')
+    elif elementos == posicoes: #permutação sem repetição
+      resultado = math.factorial(elementos)
+      print(f'O resultado é {int(resultado)} permutações possíveis.')
+    else: #arranjo sem repetição
+      resultado = math.factorial(elementos) / math.factorial(elementos - posicoes)
+      print(f'O resultado é {int(resultado)} arranjos possíveis.')
+  else:
+    if ordem_importa != "sim": #combinação com repetição
+      resultado = math.comb(elementos + posicoes - 1, posicoes)
+      print(f'O resultado é {int(resultado)} combinações possíveis, com repetição.')
+    elif elementos == posicoes: #permutação com repetição
+      resultado = elementos ** posicoes
+      print(f'O resultado é {int(resultado)} permutações possíveis, com repetição.')
+    else:#arranjo com repetição
+      resultado = elementos ** posicoes
+      print(f'O resultado é {int(resultado)} arranjos possíveis, com repetição.')
