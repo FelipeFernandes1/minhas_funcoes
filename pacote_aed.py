@@ -387,3 +387,27 @@ def intervalo_media(amostra,confianca):
   print(f'''Utilizando uma amostra de tamanho {len(amostra)}, existe a probabilidade de {confianca}% de que a real média da população esteja dentro do intervalo:
 {intervalo_confianca}
 Para reduzir o tamanho do intervalo é necessário aumentar o tamanho da amostra, ou diminuir a confiabilidade.''')
+
+#FUNÇÃO PARA ESTIMAR A PROPORÇÃO POPULACIONAL
+def intervalo_proporcao(amostra, confianca):
+    """Essa função tem como objetivo estimar a média do parâmetro de interesse na população, 
+  a partir de uma amostra.
+  argumento1 > amostra(coluna do dataframe).
+  argumento2 > nível de confiança(int).
+    """
+
+    # Calculando a proporção na amostra
+    proporcao_amostra = np.mean(amostra)
+    # Tamanho da amostra
+    n = len(amostra)
+    # Calculando o desvio padrão da proporção na amostra
+    desvio_padrao_proporcao = np.sqrt((proporcao_amostra * (1 - proporcao_amostra)) / n)
+    # Calculando o intervalo de confiança usando a distribuição normal (z)
+    z = norm.ppf(1 - (1 - (confianca/100)) / 2)
+    limite_inferior = proporcao_amostra - z * desvio_padrao_proporcao
+    limite_superior = proporcao_amostra + z * desvio_padrao_proporcao
+    intervalo_confianca = (limite_inferior,limite_superior)
+    #exibindo o resultado
+    print(f'''Utilizando uma amostra de tamanho {len(amostra)}, existe a probabilidade de {confianca}% de que a real proporção(valor 1) da população esteja dentro do intervalo:
+{intervalo_confianca}
+Para reduzir o tamanho do intervalo é necessário aumentar o tamanho da amostra, ou diminuir a confiabilidade.''')
