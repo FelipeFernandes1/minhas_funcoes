@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import math
 import numpy as np
 import statsmodels.api as sm
+from scipy.stats import t
 
 #FUNÇÃO PARA REALIZAR A ANÁLISE UNIVARIADA
 def univariada(coluna):
@@ -21,6 +22,7 @@ def univariada(coluna):
 A análise leverá em conta se a variável é nominal, ordinal, discreta ou contínua,
 porém é necessário fazer o devido tratamento para que todas variáveis qualitativas
 sejam do tipo 'object'
+argumento1 > variável(coluna dataframe)
   """
   if coluna.dtype == 'object':
     #Tabela de frequencia
@@ -84,9 +86,9 @@ CONTAGEM DE VALORES NULOS/AUSENTES
 def bivariada(explicativa, resposta, faixas=0):
   """Esta é uma função que analisa a correlação/associação entre uma variável explicativa e uma variável resposta.
 A técnicas utilizadas são Person, IV e R², a depender dos tipos de variáveis.
-Primeiro argumento informar a variável explicativa.
-Segundo argumento informar a variável resposta(Se for binária precisa ser do tipo int e conter os valores 0/1).
-Terceiro argumento facultativo"""
+argumento1 > variável explicativa(coluna dataframe).
+argumento2 > variável resposta(coluna dataframe)(Se for binária precisa ser do tipo int e conter os valores 0/1).
+argumento3 > número de faixas, caso necessário(int)."""
 
 #Calculando a correlação de Person
   if len(explicativa.unique()) > 2 and explicativa.dtype != 'object' and len(resposta.unique()) > 2:
@@ -209,8 +211,8 @@ CLASSIFICAÇÃO: {benchmark}''')
 def outliers(explicativa, resposta):
     """Está é uma função que retorna os índices considerados outliers em relação a uma variável binária.
     É necessário atribuir o retorno a uma variável, para obter os ídices.
-    primeiro argumento > variável explicativa
-    segundo argumento > variável resposta"""
+    argumento1 > variável explicativa(coluna dataframe).
+    argumento2 > variável resposta(coluna dataframe)."""
     outliers_indices = []
 
     for classe in range(2): 
@@ -229,9 +231,9 @@ def outliers(explicativa, resposta):
 #FUNÇÃO PARA CONSTRUIR UM RANKING DE ASSOCIAÇÃO/CORRELAÇÃO ENTRE AS VARIÁVEIS EXPLICATIVAS E A VARIÁVEL RESPOSTA
 def ranking(df, resposta, faixas=0):
   """Esta função retorna uma tabela com um ranking de associação/correlação.
-  primeiro argumento > dataframe
-  segundo argumento > variável resposta(Se for binária precisa ser do tipo int e conter os valores 0/1).
-  terceiro argumento > faixas(facultativo)"""
+  argumento1 > dataframe(variáveis explicativas)
+  argumento2 > variável resposta(coluna dataframe)(Se for binária precisa ser do tipo int e conter os valores 0/1).
+  argumento3 > faixas, caso necessário(int)."""
   #criando uma cópia do df para não alterar o original
   df_funcao = df.copy()
   #criando as listas para armazenar os resulados
@@ -341,10 +343,10 @@ def ranking(df, resposta, faixas=0):
 def combinatoria(elementos, posicoes, ordem_importa, tem_repeticao):
   """Função para calcular a análise combinatória, sendo permutação, arranjo ou combinação.
   É útil para utilizar na probabilidade clássica.
-  n > número de elementos possíveis
-  r > número de posições
-  ordem_importa > 'sim'/'nao' indica se a ordem das disposições importa
-  repeticao = 'sim'/'nao' indica se pode haver repetição dos elementos"""
+  argumento1 > número de elementos possíveis(int).
+  argumento2 > número de posições(int).
+  argumento3 > indica se a ordem das disposições importa('sim'/'nao').
+  argumento4 > indica se pode haver repetição dos elementos('sim'/'nao')."""
   if tem_repeticao == 'nao':
     if ordem_importa != "sim": #combinação sem repetição
       resultado = math.factorial(elementos) / (math.factorial(posicoes) * math.factorial(elementos - posicoes))
@@ -365,3 +367,23 @@ def combinatoria(elementos, posicoes, ordem_importa, tem_repeticao):
     else:#arranjo com repetição
       resultado = elementos ** posicoes
       print(f'O resultado é {int(resultado)} arranjos possíveis, com repetição.')
+
+#FUNÇÃO PARA ESTIMAR A MÉDIA POPULACIONAL
+def intervalo_media(amostra,confianca):
+  """Essa função tem como objetivo estimar a média do parâmetro de interesse na população, 
+  a partir de uma amostra.
+  argumento1 > amostra(coluna do dataframe)
+  argumento2 > nível de confiança(int)"""
+
+  # Calculando média e desvio padrão da amostra
+  media_amostra = np.mean(amostra)
+  desvio_padrao_amostra = np.std(amostra, ddof=1)  # Usamos ddof=1 para calcular o desvio padrão da amostra, não da população
+  # Tamanho da amostra
+  n = len(amostra)
+  # Graus de liberdade
+  graus_liberdade = n - 1
+  # Calculando o intervalo de confiança
+  intervalo_confianca = t.interval(confianca/100, graus_liberdade, loc=media_amostra, scale=desvio_padrao_amostra/np.sqrt(n))
+  print(f'''Utilizando uma amostra de tamanho {len(amostra)}, existe a probabilidade de {confianca}% de que a real média da população esteja dentro do intervalo:
+{intervalo_confianca}
+Para reduzir o tamanho do intervalo é necessário aumentar o tamanho da amostra, ou diminuir a confiabilidade.''')
