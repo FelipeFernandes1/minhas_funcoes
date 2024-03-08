@@ -15,6 +15,7 @@ import math
 import numpy as np
 import statsmodels.api as sm
 from scipy.stats import t
+from scipy.stats import norm
 
 #FUNÇÃO PARA REALIZAR A ANÁLISE UNIVARIADA
 def univariada(coluna):
@@ -411,3 +412,23 @@ def intervalo_proporcao(amostra, confianca):
     print(f'''Utilizando uma amostra de tamanho {len(amostra)}, existe a probabilidade de {confianca}% de que a real proporção(valor 1) da população esteja dentro do intervalo:
 {intervalo_confianca}
 Para reduzir o tamanho do intervalo é necessário aumentar o tamanho da amostra, ou diminuir a confiabilidade.''')
+
+#FUNÇÃO PARA CALCULAR O TAMANHO DA AMOSTRA
+def tamanho_amostra_margem_erro(amostra, erro_maximo, nivel_confianca):
+  """Esta função tem a finalidade de calcular o tamanho da amostra de acordo com o erro e confiança desejado.
+  O cálculo parte de uma amostra inicial, para se obter a variabilidade da mesma.
+  argumento1 > amostra(coluna do dataframe).
+  argumento2 > erro máximo esperado(int)
+  argumento3 > nível de confiança esperado(int)
+  """
+  #calculando a variância amostral
+  variancia_amostral = np.var(amostra, ddof=1)
+  #Passando nivel_confianca para probabilidade
+  nivel_confianca = nivel_confianca / 100.0
+  # Valor crítico da distribuição normal padrão (z) para o nível de confiança desejado
+  valor_critico = norm.ppf((1 - nivel_confianca) / 2)
+  # Cálculo do tamanho da amostra
+  tamanho_amostra = (((valor_critico**2) * variancia_amostral) / (erro_maximo**2))
+  #Exibindo resultado
+  print(f'''O tamanho da amostra para se obter um erro de no máximo {erro_maximo} pontos, considerando o nível de confiança de {int(nivel_confianca*100)}% é: 
+{int(tamanho_amostra)}''')
