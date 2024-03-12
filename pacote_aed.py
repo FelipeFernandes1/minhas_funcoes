@@ -439,5 +439,5 @@ def tamanho_amostra(amostra, tipo, erro_maximo, nivel_confianca):
         # Calculando o tamanho da amostra para proporção
         tamanho_amostra = ((valor_critico**2) * p * (1 - p)) / (erro_maximo**2)
     # Exibindo o resultado
-    print(f'''O tamanho da amostra para se obter um erro de no máximo {erro_maximo} pontos para mais ou para menos, considerando um nível de confiança de {int(nivel_confianca*100)}% é: 
+    print(f'''O tamanho da amostra para se obter um erro de no máximo {erro_maximo} para mais ou para menos, considerando um nível de confiança de {int(nivel_confianca*100)}% é: 
 {int(np.ceil(tamanho_amostra))}''')
