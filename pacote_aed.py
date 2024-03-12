@@ -414,21 +414,30 @@ def intervalo_proporcao(amostra, confianca):
 Para reduzir o tamanho do intervalo é necessário aumentar o tamanho da amostra, ou diminuir a confiabilidade.''')
 
 #FUNÇÃO PARA CALCULAR O TAMANHO DA AMOSTRA
-def tamanho_amostra_margem_erro(amostra, erro_maximo, nivel_confianca):
-  """Esta função tem a finalidade de calcular o tamanho da amostra de acordo com o erro e confiança desejado.
-  O cálculo parte de uma amostra inicial, para se obter a variabilidade da mesma.
-  argumento1 > amostra(coluna do dataframe).
-  argumento2 > erro máximo esperado(int)
-  argumento3 > nível de confiança esperado(int)
-  """
-  #calculando a variância amostral
-  variancia_amostral = np.var(amostra, ddof=1)
-  #Passando nivel_confianca para probabilidade
-  nivel_confianca = nivel_confianca / 100.0
-  # Valor crítico da distribuição normal padrão (z) para o nível de confiança desejado
-  valor_critico = norm.ppf((1 - nivel_confianca) / 2)
-  # Cálculo do tamanho da amostra
-  tamanho_amostra = (((valor_critico**2) * variancia_amostral) / (erro_maximo**2))
-  #Exibindo resultado
-  print(f'''O tamanho da amostra para se obter um erro de no máximo {erro_maximo} pontos, considerando o nível de confiança de {int(nivel_confianca*100)}% é: 
-{int(tamanho_amostra)}''')
+def tamanho_amostra(amostra, tipo, erro_maximo, nivel_confianca):
+    """Esta função tem a finalidade de calcular o tamanho da amostra para o parâmetro de média ou proporção populacional,
+    de acordo com o erro e o nível de confiança desejado.
+    argumento1 > amostra(coluna do dataframe)
+    argumento2 > parâmetro a ser estimado('media'/'proporcao')(int).
+    argumento3 > erro máximo esperado(int).
+    argumento4 > nível de confiança esperado(int).
+    """
+    # Convertendo o nível de confiança para a escala da distribuição normal padrão
+    nivel_confianca = nivel_confianca / 100.0
+    # Calculando o valor crítico da distribuição normal padrão para o nível de confiança desejado
+    valor_critico = norm.ppf((1 + nivel_confianca) / 2)
+    if tipo == 'media':
+        # Calculando a variância amostral
+        variancia_amostral = np.var(amostra, ddof=1)
+        # Calculando o tamanho da amostra para média
+        tamanho_amostra = ((valor_critico**2) * variancia_amostral) / (erro_maximo**2)
+    elif tipo == 'proporcao':
+        # Passando erro para float
+        erro_maximo = erro_maximo/100
+        # Calculando a proporção amostral
+        p = amostra.mean()
+        # Calculando o tamanho da amostra para proporção
+        tamanho_amostra = ((valor_critico**2) * p * (1 - p)) / (erro_maximo**2)
+    # Exibindo o resultado
+    print(f'''O tamanho da amostra para se obter um erro de no máximo {erro_maximo} pontos para mais ou para menos, considerando um nível de confiança de {int(nivel_confianca*100)}% é: 
+{int(np.ceil(tamanho_amostra))}''')
