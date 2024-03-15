@@ -441,3 +441,30 @@ def tamanho_amostra(amostra, tipo, erro_maximo, nivel_confianca):
     # Exibindo o resultado
     print(f'''O tamanho da amostra para se obter um erro de no máximo {erro_maximo} para mais ou para menos, considerando um nível de confiança de {int(nivel_confianca*100)}% é: 
 {int(np.ceil(tamanho_amostra))}''')
+
+#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA MÉDIA DE UMA POPULAÇÃO
+def teste_media_populacao(amostra, h0, h1, nivel_significancia=0.05):
+    """Esta função realiza um teste de hipótese sobre a média de uma única população.
+    - argumento1 > amostra(coluna dataframe)
+    - argumento2 > valor da hipótese nula(float)
+    - argumento3 > hipótese alternativa (string)("<", ">", "!=")
+    - argumento4 > nível de significância para o teste (default: 0.05 escala de Fisher)
+    """
+    # Atribuindo as variáveis para o cálculo
+    n = len(amostra)
+    media = np.mean(amostra)
+    desvio = np.std(amostra, ddof=1)  # Utilizamos ddof=1 para calcular o desvio padrão amostral
+    # Calculando a estatística do teste t
+    estatistica_t = ((n ** 0.5) * (media - h0)) / desvio
+    # Calculando o p-valor de acordo com a hipótese alternativa
+    if '>' in h1:
+        p_valor = 1 - t.cdf(estatistica_t, n - 1)
+    elif "!=" in h1:
+        p_valor = 2 * (1 - t.cdf(abs(estatistica_t), n - 1))
+    else:
+        p_valor = t.cdf(estatistica_t, n - 1)
+    # Comparando com o nível de significância
+    if p_valor > nivel_significancia:
+        print(f'Não existem evidências estatísticas suficientes contra h0, ou seja, não rejeitamos h0:\np-valor = {p_valor:.2f}')
+    else:
+        print(f'Existem evidências estatísticas suficientes contra h0, portanto rejeitamos h0.\np-valor = {p_valor:.2f}')
