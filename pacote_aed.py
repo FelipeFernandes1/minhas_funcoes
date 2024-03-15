@@ -444,12 +444,20 @@ def tamanho_amostra(amostra, tipo, erro_maximo, nivel_confianca):
 
 #FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA MÉDIA DE UMA POPULAÇÃO
 def teste_media_populacao(amostra, h0, h1, nivel_significancia=0.05):
-    """Esta função realiza um teste de hipótese sobre a média de uma única população.
+    """Esta função realiza um teste de hipótese sobre a média populacional.
     - argumento1 > amostra(coluna dataframe)
     - argumento2 > valor da hipótese nula(float)
     - argumento3 > hipótese alternativa (string)("<", ">", "!=")
     - argumento4 > nível de significância para o teste (default: 0.05 escala de Fisher)
     """
+    # Plotar histograma da amostra
+    num_bins = 1 + int(math.log2(len(amostra))) # Calculando o número de bins usando a regra de Sturges
+    plt.figure(figsize=(6, 3))
+    plt.hist(amostra, bins=num_bins, edgecolor='black')
+    plt.title('Histograma da Amostra')
+    plt.xlabel(amostra.name)
+    plt.ylabel('Frequência')
+    plt.show()
     # Atribuindo as variáveis para o cálculo
     n = len(amostra)
     media = np.mean(amostra)
@@ -464,6 +472,7 @@ def teste_media_populacao(amostra, h0, h1, nivel_significancia=0.05):
     else:
         p_valor = t.cdf(estatistica_t, n - 1)
     # Comparando com o nível de significância
+    print('')
     if p_valor > nivel_significancia:
         print(f'Não existem evidências estatísticas suficientes contra h0, ou seja, não rejeitamos h0:\np-valor = {p_valor:.2f}')
     else:
