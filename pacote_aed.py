@@ -445,7 +445,7 @@ def tamanho_amostra(amostra, tipo, erro_maximo, nivel_confianca):
 
 #FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA MÉDIA DE UMA POPULAÇÃO
 def teste_media_uma_populacao(amostra, h0, h1, nivel_significancia=0.05):
-    """Esta função realiza um teste de hipótese sobre a média populacional.
+    """Esta função compara a média de uma amostra em relação à média da população.
     - argumento1 > amostra(coluna dataframe)
     - argumento2 > valor da hipótese nula(float)
     - argumento3 > hipótese alternativa (string)("<", ">", "!=")
@@ -481,7 +481,7 @@ def teste_media_uma_populacao(amostra, h0, h1, nivel_significancia=0.05):
 
 #FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA AS MÉDIAS DE DUAS POPULAÇÕES
 def teste_media_duas_populacoes(amostra1, amostra2, h1, nivel_significancia=0.05):
-    """Esta função compara as médias de duas amostras independentes.
+    """Esta função compara as médias de duas amostras independentes, em relação às suas pupulações.
     - argumento1 > amostra 1 (array ou lista)
     - argumento2 > amostra 2 (array ou lista)
     - argumento3 > hipótese alternativa (string) ("<", ">", "!=")
@@ -521,5 +521,5 @@ Portanto, as médias das duas populações são iguais.
 p-valor = {p_valor:.2f}''')
     else:
       print(f'''Existem evidências estatísticas suficientes contra h0(médias iguais), ou seja, rejeitamos h0.
-Portanto, a média da primeira amostra é {"menor" if valor == 'less' else ("maior" if valor == 'greater' else "diferente")} que a segunda.
+Portanto, a média da primeira pupulação é {"menor" if valor == 'less' else ("maior" if valor == 'greater' else "diferente")} que a segunda.
 p-valor = {p_valor:.2f}''')
