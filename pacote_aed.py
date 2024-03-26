@@ -16,6 +16,7 @@ import numpy as np
 import statsmodels.api as sm
 from scipy.stats import t
 from scipy.stats import norm
+from scipy.stats import ttest_ind
 
 #FUNÇÃO PARA REALIZAR A ANÁLISE UNIVARIADA
 def univariada(coluna):
@@ -443,7 +444,7 @@ def tamanho_amostra(amostra, tipo, erro_maximo, nivel_confianca):
 {int(np.ceil(tamanho_amostra))}''')
 
 #FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA MÉDIA DE UMA POPULAÇÃO
-def teste_media_populacao(amostra, h0, h1, nivel_significancia=0.05):
+def teste_media_uma_populacao(amostra, h0, h1, nivel_significancia=0.05):
     """Esta função realiza um teste de hipótese sobre a média populacional.
     - argumento1 > amostra(coluna dataframe)
     - argumento2 > valor da hipótese nula(float)
@@ -477,3 +478,48 @@ def teste_media_populacao(amostra, h0, h1, nivel_significancia=0.05):
         print(f'Não existem evidências estatísticas suficientes contra h0, ou seja, não rejeitamos h0:\np-valor = {p_valor:.2f}')
     else:
         print(f'Existem evidências estatísticas suficientes contra h0, portanto rejeitamos h0.\np-valor = {p_valor:.2f}')
+
+#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA AS MÉDIAS DE DUAS POPULAÇÕES
+def teste_media_duas_populacoes(amostra1, amostra2, h1, nivel_significancia=0.05):
+    """Esta função compara as médias de duas amostras independentes.
+    - argumento1 > amostra 1 (array ou lista)
+    - argumento2 > amostra 2 (array ou lista)
+    - argumento3 > hipótese alternativa (string) ("<", ">", "!=")
+    - argumento4 > nível de significância para o teste (default: 0.05)
+    """
+    # Nesse caso h0 será igual a zero
+    h0 = 0
+    # Excluindo valores nulos das amostras(do contrário dá erro)
+    amostra1 = amostra1[~np.isnan(amostra1)]
+    amostra2 = amostra2[~np.isnan(amostra2)]
+    # Alterando a hipótese alternativa para se adequar á função ttest_ind
+    if h1 == '<':
+      valor = 'less'
+    elif h1 == '>':
+      valor = 'greater'
+    else:
+      valor = 'two-sided'
+    # Verificar se as variâncias são iguais ou diferentes
+    t_valor, p_value_b = stats.bartlett(amostra1, amostra2)
+    if p_value_b > nivel_significancia:
+      print("As variâncias são iguais. Portanto, foi utilizado o teste T-padrão.")
+      equal_var = True
+    else:
+      print("As variâncias são diferentes. Portanto, foi utilizado o Welch's T-test.")
+      equal_var = False     
+    # Realizar o teste t de acordo com as variâncias
+    if equal_var:
+        # Variâncias iguais, usar o teste t de Student padrão
+        t_stat, p_valor = ttest_ind(amostra1, amostra2, equal_var=True, alternative=valor)
+    else:
+        # Variâncias diferentes, usar o Welch's t-test
+        t_stat, p_valor = ttest_ind(amostra1, amostra2, equal_var=False, alternative=valor)  
+    # Classificando o p-valor de acordo com a escala de fisher
+    if p_valor > nivel_significancia:
+      print(f'''Não existem evidências estatísticas suficientes contra h0, ou seja, não rejeitamos h0.
+Portanto, as médias das duas populações são iguais.  
+p-valor = {p_valor:.2f}''')
+    else:
+      print(f'''Existem evidências estatísticas suficientes contra h0(médias iguais), ou seja, rejeitamos h0.
+Portanto, a média da primeira amostra é {"menor" if valor == 'less' else ("maior" if valor == 'greater' else "diferente")} que a segunda.
+p-valor = {p_valor:.2f}''')
