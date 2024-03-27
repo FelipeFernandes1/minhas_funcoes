@@ -523,6 +523,7 @@ def teste_media_duas_populacoes(amostra1, amostra2, h1, nivel_significancia=0.05
       valor = 'two-sided'
     # Verificar se as variâncias são iguais ou diferentes
     t_valor, p_value_b = bartlett(amostra1, amostra2)
+    print('')
     if p_value_b > nivel_significancia:
       print("As variâncias são iguais. Portanto, foi utilizado o teste T-padrão.")
       equal_var = True
