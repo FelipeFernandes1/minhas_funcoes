@@ -17,6 +17,8 @@ import statsmodels.api as sm
 from scipy.stats import t
 from scipy.stats import norm
 from scipy.stats import ttest_ind
+from scipy.stats import ttest_rel
+from scipy.stats import bartlett
 
 #FUNÇÃO PARA REALIZAR A ANÁLISE UNIVARIADA
 def univariada(coluna):
@@ -517,7 +519,7 @@ def teste_media_duas_populacoes(amostra1, amostra2, h1, nivel_significancia=0.05
     else:
       valor = 'two-sided'
     # Verificar se as variâncias são iguais ou diferentes
-    t_valor, p_value_b = stats.bartlett(amostra1, amostra2)
+    t_valor, p_value_b = bartlett(amostra1, amostra2)
     if p_value_b > nivel_significancia:
       print("As variâncias são iguais. Portanto, foi utilizado o teste T-padrão.")
       equal_var = True
