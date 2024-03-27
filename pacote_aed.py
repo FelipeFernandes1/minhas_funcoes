@@ -538,7 +538,7 @@ def teste_media_duas_populacoes(amostra1, amostra2, h1, nivel_significancia=0.05
         # Variâncias diferentes, usar o Welch's t-test
         t_stat, p_valor = ttest_ind(amostra1, amostra2, equal_var=False, alternative=valor)  
     # Classificando o p-valor de acordo com a escala de fisher
-    print('')
+    print('-'*15)
     if p_valor > nivel_significancia:
       print(f'''Não existem evidências estatísticas suficientes contra h0, ou seja, não rejeitamos h0.
 Portanto, as médias das duas populações são iguais.  
