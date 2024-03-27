@@ -477,7 +477,7 @@ def teste_media_uma_populacao(amostra, h0, h1, nivel_significancia=0.05):
     # Classificando o p-valor de acordo com a escala de fisher
     print('')
     print(f'Hipótese nula: A média da pupulação é igual a {h0}.')
-    print(f'Hipótese alternativa: A média da pupulação é {"menor" if h1 == '<' else ("maior" if h1 == '>' else "diferente")} que {h0}.')
+    print(f'Hipótese alternativa: A média da pupulação é {"menor" if h1 == "<" else ("maior" if h1 == ">" else "diferente")} que {h0}.')
     print('-'*15)
     if p_valor > nivel_significancia:
         print(f'Não existem evidências estatísticas suficientes contra h0, ou seja, não rejeitamos h0:\np-valor = {p_valor:.2f}')
