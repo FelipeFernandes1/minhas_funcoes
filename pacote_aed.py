@@ -474,8 +474,11 @@ def teste_media_uma_populacao(amostra, h0, h1, nivel_significancia=0.05):
         p_valor = 2 * (1 - t.cdf(abs(estatistica_t), n - 1))
     else:
         p_valor = t.cdf(estatistica_t, n - 1)
-    # Comparando com o nível de significância
+    # Classificando o p-valor de acordo com a escala de fisher
     print('')
+    print(f'Hipótese nula: A média da pupulação é igual a {h0}.')
+    print(f'Hipótese alternativa: A média da pupulação é {"menor" if h1 == '<' else ("maior" if h1 == '>' else "diferente")} que {h0}.')
+    print('-'*15)
     if p_valor > nivel_significancia:
         print(f'Não existem evidências estatísticas suficientes contra h0, ou seja, não rejeitamos h0:\np-valor = {p_valor:.2f}')
     else:
@@ -534,6 +537,7 @@ def teste_media_duas_populacoes(amostra1, amostra2, h1, nivel_significancia=0.05
         # Variâncias diferentes, usar o Welch's t-test
         t_stat, p_valor = ttest_ind(amostra1, amostra2, equal_var=False, alternative=valor)  
     # Classificando o p-valor de acordo com a escala de fisher
+    print('')
     if p_valor > nivel_significancia:
       print(f'''Não existem evidências estatísticas suficientes contra h0, ou seja, não rejeitamos h0.
 Portanto, as médias das duas populações são iguais.  
@@ -583,6 +587,7 @@ def teste_media_duas_populacoes_pareadas(amostra1, amostra2, h1, nivel_significa
     # Aplicando o teste t para populações pareadas
     t_stat, p_valor = ttest_rel(amostra1, amostra2, alternative=valor)
     # Classificando o p-valor de acordo com a escala de fisher
+    print('')
     if p_valor > nivel_significancia:
       print(f'''Não existem evidências estatísticas suficientes contra h0, ou seja, não rejeitamos h0.
 Portanto, as médias das duas populações pareadas são iguais.  
