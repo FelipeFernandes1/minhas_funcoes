@@ -455,7 +455,7 @@ def teste_media_uma_populacao(amostra, h0, h1, nivel_significancia=0.05):
     """
     # Plotar histograma da amostra
     num_bins = 1 + int(math.log2(len(amostra))) # Calculando o número de bins usando a regra de Sturges
-    plt.figure(figsize=(6, 3))
+    plt.figure(figsize=(3, 3))
     plt.hist(amostra, bins=num_bins, edgecolor='black')
     plt.title('Histograma da Amostra')
     plt.xlabel(amostra.name)
