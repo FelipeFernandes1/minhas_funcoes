@@ -494,15 +494,16 @@ def teste_media_duas_populacoes(amostra1, amostra2, h1, nivel_significancia=0.05
     amostra1 = amostra1[~np.isnan(amostra1)]
     amostra2 = amostra2[~np.isnan(amostra2)]
     # Plotando histogramas
-    num_bins = 1 + int(math.log2(len(amostra))) # Calculando o número de bins usando a regra de Sturges
+    num_bins1 = 1 + int(math.log2(len(amostra1))) # Calculando o número de bins usando a regra de Sturges
+    num_bins2 = 1 + int(math.log2(len(amostra2))) # Calculando o número de bins usando a regra de Sturges
     plt.figure(figsize=(6, 3))
     plt.subplot(1, 2, 1)
-    plt.hist(amostra1, bins=num_bins, edgecolor='black')
+    plt.hist(amostra1, bins=num_bins1, edgecolor='black')
     plt.title('Amostra 1')
     plt.xlabel('amostra1.name')
     plt.ylabel('Frequência')    
     plt.subplot(1, 2, 2)
-    plt.hist(amostra2, bins=num_bins, edgecolor='black')
+    plt.hist(amostra2, bins=num_bins2, edgecolor='black')
     plt.title('Amostra 2')
     plt.xlabel('amostra2.name')
     plt.ylabel('Frequência') 
@@ -555,15 +556,16 @@ def teste_media_duas_populacoes_pareadas(amostra1, amostra2, h1, nivel_significa
     amostra1 = amostra1[~np.isnan(amostra1)]
     amostra2 = amostra2[~np.isnan(amostra2)]
      # Plotando histogramas
-    num_bins = 1 + int(math.log2(len(amostra))) # Calculando o número de bins usando a regra de Sturges
+    num_bins1 = 1 + int(math.log2(len(amostra1))) # Calculando o número de bins usando a regra de Sturges
+    num_bins2 = 1 + int(math.log2(len(amostra2))) # Calculando o número de bins usando a regra de Sturges
     plt.figure(figsize=(6, 3))
     plt.subplot(1, 2, 1)
-    plt.hist(amostra1, bins=num_bins, edgecolor='black')
+    plt.hist(amostra1, bins=num_bins1, edgecolor='black')
     plt.title('Amostra 1')
     plt.xlabel('amostra1.name')
     plt.ylabel('Frequência')    
     plt.subplot(1, 2, 2)
-    plt.hist(amostra2, bins=num_bins, edgecolor='black')
+    plt.hist(amostra2, bins=num_bins2, edgecolor='black')
     plt.title('Amostra 2')
     plt.xlabel('amostra2.name')
     plt.ylabel('Frequência') 
