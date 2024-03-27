@@ -397,7 +397,6 @@ def intervalo_proporcao(amostra, confianca):
   argumento1 > amostra(coluna do dataframe).
   argumento2 > nível de confiança(int).
     """
-
     # Calculando a proporção na amostra
     proporcao_amostra = np.mean(amostra)
     # Tamanho da amostra
@@ -446,6 +445,7 @@ def tamanho_amostra(amostra, tipo, erro_maximo, nivel_confianca):
 #FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA MÉDIA DE UMA POPULAÇÃO
 def teste_media_uma_populacao(amostra, h0, h1, nivel_significancia=0.05):
     """Esta função compara a média de uma amostra em relação à média da população.
+    Exemplo: Comparação da média do Ph da água de uma represa e um valor de referência(h0). 
     - argumento1 > amostra(coluna dataframe)
     - argumento2 > valor da hipótese nula(float)
     - argumento3 > hipótese alternativa (string)("<", ">", "!=")
@@ -482,6 +482,7 @@ def teste_media_uma_populacao(amostra, h0, h1, nivel_significancia=0.05):
 #FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA AS MÉDIAS DE DUAS POPULAÇÕES
 def teste_media_duas_populacoes(amostra1, amostra2, h1, nivel_significancia=0.05):
     """Esta função compara as médias de duas amostras independentes, em relação às suas pupulações.
+    Exemplo: Comparação entre a média do Ph da água de duas represas. 
     - argumento1 > amostra 1 (array ou lista)
     - argumento2 > amostra 2 (array ou lista)
     - argumento3 > hipótese alternativa (string) ("<", ">", "!=")
@@ -492,6 +493,21 @@ def teste_media_duas_populacoes(amostra1, amostra2, h1, nivel_significancia=0.05
     # Excluindo valores nulos das amostras(do contrário dá erro)
     amostra1 = amostra1[~np.isnan(amostra1)]
     amostra2 = amostra2[~np.isnan(amostra2)]
+    # Plotando histogramas
+    num_bins = 1 + int(math.log2(len(amostra))) # Calculando o número de bins usando a regra de Sturges
+    plt.figure(figsize=(6, 3))
+    plt.subplot(1, 2, 1)
+    plt.hist(amostra1, bins=num_bins, edgecolor='black')
+    plt.title('Amostra 1')
+    plt.xlabel('amostra1.name')
+    plt.ylabel('Frequência')    
+    plt.subplot(1, 2, 2)
+    plt.hist(amostra2, bins=num_bins, edgecolor='black')
+    plt.title('Amostra 2')
+    plt.xlabel('amostra2.name')
+    plt.ylabel('Frequência') 
+    plt.tight_layout()
+    plt.show()
     # Alterando a hipótese alternativa para se adequar á função ttest_ind
     if h1 == '<':
       valor = 'less'
@@ -518,6 +534,54 @@ def teste_media_duas_populacoes(amostra1, amostra2, h1, nivel_significancia=0.05
     if p_valor > nivel_significancia:
       print(f'''Não existem evidências estatísticas suficientes contra h0, ou seja, não rejeitamos h0.
 Portanto, as médias das duas populações são iguais.  
+p-valor = {p_valor:.2f}''')
+    else:
+      print(f'''Existem evidências estatísticas suficientes contra h0(médias iguais), ou seja, rejeitamos h0.
+Portanto, a média da primeira pupulação é {"menor" if valor == 'less' else ("maior" if valor == 'greater' else "diferente")} que a segunda.
+p-valor = {p_valor:.2f}''')
+
+#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA MÉDIA DE DUAS POPULAÇÕES PAREADAS
+def teste_media_duas_populacoes_pareadas(amostra1, amostra2, h1, nivel_significancia=0.05):
+    """Esta função compara as médias de duas amostras pareadas, em relação à população.
+    Exemplo: comparação da média do desempenho dos funcionários, antes e após implementar um novo processo.
+    - argumento1 > amostra 1 (array ou lista)
+    - argumento2 > amostra 2 (array ou lista)
+    - argumento3 > hipótese alternativa (string) ("<", ">", "!=")
+    - argumento4 > nível de significância para o teste (default: 0.05)
+    """
+    # Nesse caso h0 será igual a zero
+    h0 = 0
+    # Excluindo valores nulos das amostras(do contrário dá erro)
+    amostra1 = amostra1[~np.isnan(amostra1)]
+    amostra2 = amostra2[~np.isnan(amostra2)]
+     # Plotando histogramas
+    num_bins = 1 + int(math.log2(len(amostra))) # Calculando o número de bins usando a regra de Sturges
+    plt.figure(figsize=(6, 3))
+    plt.subplot(1, 2, 1)
+    plt.hist(amostra1, bins=num_bins, edgecolor='black')
+    plt.title('Amostra 1')
+    plt.xlabel('amostra1.name')
+    plt.ylabel('Frequência')    
+    plt.subplot(1, 2, 2)
+    plt.hist(amostra2, bins=num_bins, edgecolor='black')
+    plt.title('Amostra 2')
+    plt.xlabel('amostra2.name')
+    plt.ylabel('Frequência') 
+    plt.tight_layout()
+    plt.show()
+    # Alterando a hipótese alternativa para se adequar á função ttest_rel
+    if h1 == '<':
+      valor = 'less'
+    elif h1 == '>':
+      valor = 'greater'
+    else:
+      valor = 'two-sided'
+    # Aplicando o teste t para populações pareadas
+    t_stat, p_valor = ttest_rel(amostra1, amostra2, alternative=valor)
+    # Classificando o p-valor de acordo com a escala de fisher
+    if p_valor > nivel_significancia:
+      print(f'''Não existem evidências estatísticas suficientes contra h0, ou seja, não rejeitamos h0.
+Portanto, as médias das duas populações pareadas são iguais.  
 p-valor = {p_valor:.2f}''')
     else:
       print(f'''Existem evidências estatísticas suficientes contra h0(médias iguais), ou seja, rejeitamos h0.
