@@ -453,6 +453,8 @@ def teste_media_uma_populacao(amostra, h0, h1, nivel_significancia=0.05):
     - argumento3 > hipótese alternativa (string)("<", ">", "!=")
     - argumento4 > nível de significância para o teste (default: 0.05 escala de Fisher)
     """
+    # Excluindo valores nulos das amostras(do contrário dá erro)
+    amostra = amostra[~np.isnan(amostra)]
     # Plotar histograma da amostra
     num_bins = 1 + int(math.log2(len(amostra))) # Calculando o número de bins usando a regra de Sturges
     plt.figure(figsize=(3, 3))
