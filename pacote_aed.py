@@ -19,6 +19,8 @@ from scipy.stats import norm
 from scipy.stats import ttest_ind
 from scipy.stats import ttest_rel
 from scipy.stats import bartlett
+from scipy.stats import binom
+from statsmodels.stats.proportion import proportions_ztest
 
 #FUNÇÃO PARA REALIZAR A ANÁLISE UNIVARIADA
 def univariada(coluna):
@@ -444,8 +446,8 @@ def tamanho_amostra(amostra, tipo, erro_maximo, nivel_confianca):
     print(f'''O tamanho da amostra para se obter um erro de no máximo {erro_maximo} para mais ou para menos, considerando um nível de confiança de {int(nivel_confianca*100)}% é: 
 {int(np.ceil(tamanho_amostra))}''')
 
-#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA MÉDIA DE UMA POPULAÇÃO
-def teste_media_uma_populacao(amostra, h0, h1, nivel_significancia=0.05):
+#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA MÉDIA DE UMA AMOSTRA
+def teste_media(amostra, h0, h1, nivel_significancia=0.05):
     """Esta função compara a média de uma amostra em relação à média da população.
     Exemplo: Comparação da média do Ph da água de uma represa e um valor de referência(h0). 
     - argumento1 > amostra(coluna dataframe)
@@ -486,8 +488,52 @@ def teste_media_uma_populacao(amostra, h0, h1, nivel_significancia=0.05):
     else:
         print(f'Existem evidências estatísticas suficientes contra h0, portanto rejeitamos h0.\np-valor = {p_valor:.2f}')
 
-#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA AS MÉDIAS DE DUAS POPULAÇÕES
-def teste_media_duas_populacoes(amostra1, amostra2, h1, nivel_significancia=0.05):
+#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA PROPORÇÃO DE UMA AMOSTRA
+def teste_proporcao(amostra, p0, h1, nivel_significancia=0.05):
+    """Esta função compara a proporção de uma amostra em relação à proporção da população.
+    Exemplo: Comparação da proporção de clientes que compraram um produto em relação a uma proporção de referência(p0). 
+    - argumento1 > amostra(coluna dataframe)
+    - argumento2 > valor da proporção da hipótese nula(float)
+    - argumento3 > hipótese alternativa (string)("<", ">", "!=")
+    - argumento4 > nível de significância para o teste (default: 0.05 escala de Fisher)
+    """
+    # Excluindo valores nulos das amostras(do contrário dá erro)
+    amostra = amostra[~np.isnan(amostra)]
+    # Atribuindo as variáveis para o cálculo
+    n = len(amostra)
+    k = sum(amostra)
+    # Calculando a estatística do teste z
+    p_hat = k / n
+    z_stat = (p_hat - p0) / (np.sqrt((p0 * (1 - p0)) / n))
+    # Calculando o p-valor de acordo com a hipótese alternativa
+    if h1 == '>':
+        p_valor = 1 - binom.cdf(k-1, n, p0)
+    elif h1 == '<':
+        p_valor = binom.cdf(k, n, p0)
+    else:
+        p_valor = 2 * min(binom.cdf(k, n, p0), 1 - binom.cdf(k-1, n, p0))
+    # Plotando gráficos de pizza
+    plt.figure(figsize=(6, 3))
+    plt.subplot(1, 2, 1)
+    plt.pie([k, n - k], labels=['Evento', 'Não Evento'], autopct='%1.1f%%', startangle=140)
+    plt.title('Amostra')
+    plt.subplot(1, 2, 2)
+    plt.pie([p0 * n, (1 - p0) * n], labels=['Evento', 'Não Evento'], autopct='%1.1f%%', startangle=140)
+    plt.title('População')
+    plt.tight_layout()
+    plt.show()
+    # Classificando o p-valor de acordo com o nível de significância
+    print('')
+    print(f'Hipótese nula: A proporção da população é igual a {p0}.')
+    print(f'Hipótese alternativa: A proporção da população é {"menor" if h1 == "<" else ("maior" if h1 == ">" else "diferente")} que {p0}.')
+    print('-'*15)
+    if p_valor > nivel_significancia:
+        print(f'Não existem evidências estatísticas suficientes contra H0, ou seja, não rejeitamos H0:\np-valor = {p_valor:.2f}')
+    else:
+        print(f'Existem evidências estatísticas suficientes contra H0, portanto rejeitamos H0.\np-valor = {p_valor:.2f}')
+
+#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA AS MÉDIAS DE DUAS AMOSTRAS INDEPENDENTES
+def teste_media_independentes(amostra1, amostra2, h1, nivel_significancia=0.05):
     """Esta função compara as médias de duas amostras independentes, em relação às suas pupulações.
     Exemplo: Comparação entre a média do Ph da água de duas represas. 
     - argumento1 > amostra 1 (array ou lista)
@@ -550,10 +596,10 @@ p-valor = {p_valor:.2f}''')
 Portanto, a média da primeira pupulação é {"menor" if valor == 'less' else ("maior" if valor == 'greater' else "diferente")} que a segunda.
 p-valor = {p_valor:.2f}''')
 
-#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA MÉDIA DE DUAS POPULAÇÕES PAREADAS
-def teste_media_duas_populacoes_pareadas(amostra1, amostra2, h1, nivel_significancia=0.05):
+#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA MÉDIA DE DUAS AMOSTRAS PAREADAS
+def teste_media_pareadas(amostra1, amostra2, h1, nivel_significancia=0.05):
     """Esta função compara as médias de duas amostras pareadas, em relação à população.
-    Exemplo: comparação da média do desempenho dos funcionários, antes e após implementar um novo processo.
+    Exemplo: comparação da média do desempenho dos mesmos funcionários, antes e após implementar um novo processo.
     - argumento1 > amostra 1 (array ou lista)
     - argumento2 > amostra 2 (array ou lista)
     - argumento3 > hipótese alternativa (string) ("<", ">", "!=")
@@ -598,4 +644,51 @@ p-valor = {p_valor:.2f}''')
     else:
       print(f'''Existem evidências estatísticas suficientes contra h0(médias iguais), ou seja, rejeitamos h0.
 Portanto, a média da primeira pupulação é {"menor" if valor == 'less' else ("maior" if valor == 'greater' else "diferente")} que a segunda.
+p-valor = {p_valor:.2f}''')
+
+#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA PROPORÇÃO DE DUAS AMOSTRAS INDEPENDENTES
+def teste_proporcao_independentes(amostra1, amostra2, h1, nivel_significancia=0.05):
+    """Esta função compara as proporções de duas amostras independentes, em relação às suas populações.
+    Exemplo: Comparação entre a proporção de clientes que compraram em duas lojas diferentes. 
+    - argumento1 > amostra 1 (array ou lista)
+    - argumento2 > amostra 2 (array ou lista)
+    - argumento3 > hipótese alternativa (string) ("<", ">", "!=")
+    - argumento4 > nível de significância para o teste (default: 0.05)
+    """
+    # Nesse caso h0 será igual a zero
+    h0 = 0
+    # Excluindo valores nulos das amostras (do contrário dá erro)
+    amostra1 = amostra1[~np.isnan(amostra1)]
+    amostra2 = amostra2[~np.isnan(amostra2)]
+    # Realizar o teste de proporções
+    count1 = sum(amostra1)
+    nobs1 = len(amostra1)
+    count2 = sum(amostra2)
+    nobs2 = len(amostra2)
+    if h1 == '<':
+        alternative = 'smaller'
+    elif h1 == '>':
+        alternative = 'larger'
+    else:
+        alternative = 'two-sided'
+    z_stat, p_valor = proportions_ztest([count1, count2], [nobs1, nobs2], alternative=alternative)
+    # Plotando gráficos de pizza
+    plt.figure(figsize=(6, 3))
+    plt.subplot(1, 2, 1)
+    plt.pie([count1, nobs1 - count1], labels=['Evento', 'Não Evento'], autopct='%1.1f%%', startangle=140)
+    plt.title('Amostra 1')
+    plt.subplot(1, 2, 2)
+    plt.pie([count2, nobs2 - count2], labels=['Evento', 'Não Evento'], autopct='%1.1f%%', startangle=140)
+    plt.title('Amostra 2')
+    plt.tight_layout()
+    plt.show()
+    # Classificando o p-valor de acordo com o nível de significância
+    print('-'*15)
+    if p_valor > nivel_significancia:
+        print(f'''Não existem evidências estatísticas suficientes contra H0, ou seja, não rejeitamos H0.
+Portanto, as proporções das duas populações são iguais.  
+p-valor = {p_valor:.2f}''')
+    else:
+        print(f'''Existem evidências estatísticas suficientes contra H0 (proporções iguais), ou seja, rejeitamos H0.
+Portanto, a proporção da primeira população é {"menor" if alternative == 'smaller' else ("maior" if alternative == 'larger' else "diferente")} que a segunda.
 p-valor = {p_valor:.2f}''')
