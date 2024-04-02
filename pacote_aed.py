@@ -596,7 +596,7 @@ p-valor = {p_valor:.2f}''')
 Portanto, a média da primeira pupulação é {"menor" if valor == 'less' else ("maior" if valor == 'greater' else "diferente")} que a segunda.
 p-valor = {p_valor:.2f}''')
 
-#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA MÉDIA DE DUAS AMOSTRAS PAREADAS
+#FUNÇÃO PARA REALIZAR UM TESTE DE HIPÓTESE PARA MÉDIA(proporção) DE DUAS AMOSTRAS PAREADAS
 def teste_media_pareadas(amostra1, amostra2, h1, nivel_significancia=0.05):
     """Esta função compara as médias de duas amostras pareadas, em relação à população.
     Exemplo: comparação da média do desempenho dos mesmos funcionários, antes e após implementar um novo processo.
