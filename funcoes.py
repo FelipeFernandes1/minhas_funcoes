@@ -249,7 +249,7 @@ def quantitativa(df, target_variable, variables_to_compare):
     fig.update_layout(
         height=300 * num_rows,  # Ajustar altura do gráfico
         width=1200,  # Largura fixa
-        title_text=f"Análise de Correlação com {target_variable}",
+        #title_text=f"Análise de Correlação com {target_variable}",
         showlegend=False,
         template="plotly_white"
     )
@@ -322,7 +322,7 @@ def qualitativa(df, var1, var2, normalize='none', cramers_v=True, chi2_test=True
             print(f"Teste Qui-Quadrado entre {var1} e {v}: Estatística Qui-Quadrado = {chi2_stat:.2f}, p-valor = {p_val:.4f}")
 
             if p_val < 0.05:
-                print(f"Hipótese rejeitada: Existe associação significativa entre {var1} e {v}.")
+                print(f"Hipótese rejeitada: Existe associação significativa entre {var1} e {v}.\n")
             else:
                 print(f"Hipótese não rejeitada: Não existe associação significativa entre {var1} e {v}.\n")
 
