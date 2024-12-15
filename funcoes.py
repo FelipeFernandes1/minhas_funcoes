@@ -80,7 +80,10 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
         rows = (num_graphs - 1) // 4 + 1  # Calcula o número de linhas necessárias
         cols = 4  # Quatro gráficos por linha
 
-        fig = make_subplots(rows=rows, cols=cols, subplot_titles=comparison_variables)
+        # Criar subgráficos sem títulos
+        fig = make_subplots(
+            rows=rows, cols=cols, subplot_titles=[]  # Removendo os títulos dos subgráficos
+        )
 
         # Adicionar gráficos
         for idx, num_var in enumerate(comparison_variables):
@@ -93,18 +96,19 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
             boxplot = go.Box(
                 x=temp_df[target_variable],
                 y=temp_df[num_var],
-                name=num_var
             )
             fig.add_trace(boxplot, row=row, col=col)
+
+            fig.update_yaxes(title_text=num_var, row=row, col=col)
 
         # Layout final
         fig.update_layout(
             height=300 * rows,  # Ajusta altura com base no número de linhas
-            #title_text=f"Boxplots de {target_variable} com variáveis numéricas",
+            title_text=f"Gráficos de {target_variable} com variáveis numéricas",  # Título do gráfico
             showlegend=False,
             template="plotly_white"
         )
-        fig.update_yaxes(title_text=target_variable)  # Adiciona nome da variável no eixo Y
+        fig.update_xaxes(title_text=target_variable)
         fig.show()
 
         # Exibir índices eta² e R²
@@ -142,7 +146,10 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
         rows = (num_graphs - 1) // 4 + 1  # Calcula o número de linhas necessárias
         cols = 4  # Quatro gráficos por linha
 
-        fig = make_subplots(rows=rows, cols=cols, subplot_titles=comparison_variables)
+        # Criar subgráficos sem títulos
+        fig = make_subplots(
+            rows=rows, cols=cols, subplot_titles=[]  # Removendo os títulos dos subgráficos
+        )
 
         # Adicionar gráficos
         for idx, cat_var in enumerate(comparison_variables):
@@ -154,15 +161,16 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
 
             boxplot = go.Box(
                 x=temp_df[cat_var],
-                y=temp_df[target_variable],
-                name=cat_var
+                y=temp_df[target_variable]
             )
             fig.add_trace(boxplot, row=row, col=col)
+
+            fig.update_xaxes(title_text=cat_var, row=row, col=col)
 
         # Layout final
         fig.update_layout(
             height=300 * rows,  # Ajusta altura com base no número de linhas
-            title_text=f"Boxplots de {target_variable} com variáveis categóricas",
+            title_text=f"Gráficos de {target_variable} com variáveis categóricas",  # Título do gráfico
             showlegend=False,
             template="plotly_white"
         )
@@ -172,7 +180,7 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
         # Exibir índices eta² e R²
         print("Índices Eta² e R² (Associação entre variável numérica e categóricas):")
         for var in eta_squared:
-            print(f"{var}: Eta² = {eta_squared[var]:.2f}, R² = {r_squared[var]:.2f}")
+            print(f"{var}: Eta² = {eta_squared[var]}, R² = {r_squared[var]}")
 
     else:
         raise ValueError("O parâmetro 'target_type' deve ser 'categorical' ou 'numeric'.")
