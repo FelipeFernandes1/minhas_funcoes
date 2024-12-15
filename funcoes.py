@@ -21,7 +21,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
-def analyze_categorical_correlation(df, target_variable, comparison_variables, target_type="categorical"):
+def qualitativa_quantitativa(df, target_variable, comparison_variables, target_type="categorical"):
     """
     Analisa a relação entre uma variável alvo (categórica ou numérica) e um conjunto de variáveis de comparação.
     Cria gráficos de boxplot com Plotly e calcula o índice eta (η²) e o R² para variáveis numéricas e categóricas.
@@ -187,7 +187,7 @@ def analyze_categorical_correlation(df, target_variable, comparison_variables, t
     else:
         raise ValueError("O parâmetro 'target_type' deve ser 'categorical' ou 'numeric'.")
 
-def analyze_correlation(df, target_variable, variables_to_compare):
+def quantitativa(df, target_variable, variables_to_compare):
     """
     Analisa a correlação entre uma variável alvo e um conjunto de variáveis específicas,
     exibindo as correlações de Pearson e Spearman.
@@ -276,7 +276,7 @@ def analyze_correlation(df, target_variable, variables_to_compare):
     for var, corr in correlations_spearman.items():
         print(f"{var}: {corr:.2f}")
 
-def categorical_heatmap(df, var1, var2, normalize='none', cramers_v=True, chi2_test=True, cohen_kappa=True):
+def qualitativa(df, var1, var2, normalize='none', cramers_v=True, chi2_test=True, cohen_kappa=True):
     """
     Gera um mapa de calor interativo e opcionalmente calcula o V de Cramér, o Teste Qui-Quadrado e o Kappa de Cohen
     para medir a associação entre var1 e várias variáveis de var2.
