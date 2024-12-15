@@ -266,7 +266,7 @@ def quantitativa(df, target_variable, variables_to_compare):
     for var, corr in correlations_spearman.items():
         print(f"{var}: {corr:.2f}")
 
-def qualitativa(df, var1, var2, normalize='none', cramers_v=True, chi2_test=True, cohen_kappa=True):
+def qualitativa(df, var1, var2, normalize='none', cramers_v=True, chi2_test=True, cohen_kappa=True, handle_missing='drop'):
     """
     Gera um mapa de calor interativo e opcionalmente calcula o V de Cramér, o Teste Qui-Quadrado e o Kappa de Cohen
     para medir a associação entre var1 e várias variáveis de var2.
@@ -279,11 +279,13 @@ def qualitativa(df, var1, var2, normalize='none', cramers_v=True, chi2_test=True
     - cramers_v (bool): Se True, calcula e exibe o V de Cramér para cada comparação.
     - chi2_test (bool): Se True, realiza o Teste Qui-Quadrado entre as variáveis.
     - cohen_kappa (bool): Se True, calcula o Kappa de Cohen entre as variáveis.
+    - handle_missing (str): Estratégia para lidar com valores ausentes ('drop', 'fill'). 
+                            'drop' remove as linhas com valores ausentes, 'fill' substitui os valores ausentes por 'Desconhecido'.
 
     Retorna:
     - Nada. Exibe o gráfico para cada variável de var2 e imprime as métricas de associação (se solicitado).
     """
-
+    
     # Verifica se as colunas existem no DataFrame
     if var1 not in df.columns:
         raise ValueError("A coluna var1 especificada não existe no DataFrame.")
@@ -292,12 +294,22 @@ def qualitativa(df, var1, var2, normalize='none', cramers_v=True, chi2_test=True
         raise ValueError("Uma ou mais colunas em var2 não existem no DataFrame.")
 
     for v in var2:
+        # Cria uma cópia do DataFrame original para cada iteração
+        df_temp = df.copy()
+
+        # Tratar valores ausentes conforme a estratégia definida
+        if handle_missing == 'drop':
+            df_temp = df_temp.dropna(subset=[var1, v])
+        elif handle_missing == 'fill':
+            df_temp[var1] = df_temp[var1].fillna('Desconhecido')
+            df_temp[v] = df_temp[v].fillna('Desconhecido')
+        
         # Cria a tabela de contingência
-        contingency_table = pd.crosstab(df[v], df[var1], normalize=normalize if normalize != 'none' else False)
+        contingency_table = pd.crosstab(df_temp[v], df_temp[var1], normalize=normalize if normalize != 'none' else False)
 
         # Calcula o V de Cramér, se solicitado
         if cramers_v:
-            absolute_table = pd.crosstab(df[v], df[var1])  # Tabela não normalizada
+            absolute_table = pd.crosstab(df_temp[v], df_temp[var1])  # Tabela não normalizada
             chi2, _, _, _ = chi2_contingency(absolute_table)
             n = absolute_table.values.sum()
             r, k = absolute_table.shape
@@ -318,7 +330,7 @@ def qualitativa(df, var1, var2, normalize='none', cramers_v=True, chi2_test=True
 
         # Realiza o Teste Qui-Quadrado, se solicitado
         if chi2_test:
-            chi2_stat, p_val, dof, expected = chi2_contingency(pd.crosstab(df[v], df[var1]))
+            chi2_stat, p_val, dof, expected = chi2_contingency(pd.crosstab(df_temp[v], df_temp[var1]))
             print(f"Teste Qui-Quadrado entre {var1} e {v}: Estatística Qui-Quadrado = {chi2_stat:.2f}, p-valor = {p_val:.4f}")
 
             if p_val < 0.05:
@@ -328,7 +340,7 @@ def qualitativa(df, var1, var2, normalize='none', cramers_v=True, chi2_test=True
 
         # Calcula o Kappa de Cohen, se solicitado
         if cohen_kappa:
-            kappa = cohen_kappa_score(df[var1], df[v])
+            kappa = cohen_kappa_score(df_temp[var1], df_temp[v])
             print(f"Kappa de Cohen entre {var1} e {v}: {kappa:.2f}")
             if kappa < 0.20:
                 print("Interpretação: Concordância muito fraca ou nenhuma concordância.")
