@@ -257,7 +257,7 @@ def quantitativa(df, target_variable, variables_to_compare):
     fig.update_layout(
         height=300 * num_rows,  # Ajustar altura do gráfico
         width=1200,  # Largura fixa
-        #title_text=f"Análise de Correlação com {target_variable}",
+        title_text=f"Análise de Correlação com {target_variable}",
         showlegend=False,
         template="plotly_white"
     )
