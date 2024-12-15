@@ -75,15 +75,6 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
             y_pred = model.predict(X)
             r_squared[num_var] = r2_score(y, y_pred)
 
-        # Ordenar as categorias com base na mediana de cada variável numérica
-        category_order = {}
-        for num_var in comparison_variables:
-            if not np.issubdtype(df[num_var].dtype, np.number):
-                continue
-            median_per_category = df.groupby(target_variable, observed=True)[num_var].median()
-            sorted_categories = median_per_category.sort_values(ascending=False).index
-            category_order[num_var] = sorted_categories
-
         # Configuração de subplots: 4 gráficos por linha
         num_graphs = len(comparison_variables)
         rows = (num_graphs - 1) // 4 + 1  # Calcula o número de linhas necessárias
@@ -99,9 +90,6 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
             row = idx // cols + 1
             col = idx % cols + 1
 
-            # Reordenar os valores de target_variable com base na mediana
-            temp_df[target_variable] = pd.Categorical(temp_df[target_variable], categories=category_order[num_var], ordered=True)
-
             boxplot = go.Box(
                 x=temp_df[target_variable],
                 y=temp_df[num_var],
@@ -112,10 +100,11 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
         # Layout final
         fig.update_layout(
             height=300 * rows,  # Ajusta altura com base no número de linhas
-            title_text=f"Boxplots de {target_variable} com variáveis numéricas",
+            #title_text=f"Boxplots de {target_variable} com variáveis numéricas",
             showlegend=False,
             template="plotly_white"
         )
+        fig.update_yaxes(title_text=target_variable)  # Adiciona nome da variável no eixo Y
         fig.show()
 
         # Exibir índices eta² e R²
@@ -177,6 +166,7 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
             showlegend=False,
             template="plotly_white"
         )
+        fig.update_yaxes(title_text=target_variable)  # Adiciona nome da variável no eixo Y
         fig.show()
 
         # Exibir índices eta² e R²
@@ -186,7 +176,7 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
 
     else:
         raise ValueError("O parâmetro 'target_type' deve ser 'categorical' ou 'numeric'.")
-
+        
 def quantitativa(df, target_variable, variables_to_compare):
     """
     Analisa a correlação entre uma variável alvo e um conjunto de variáveis específicas,
