@@ -14,12 +14,9 @@ import numpy as np
 from sklearn.metrics import cohen_kappa_score
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import pandas as pd
-import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+from scipy.stats import f_oneway
 
 def qualitativa_quantitativa(df, target_variable, comparison_variables, target_type="categorical"):
     """
@@ -33,7 +30,7 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
     - target_type: Tipo da variável alvo ('categorical' ou 'numeric'). Padrão é 'categorical'.
 
     Retorno:
-    - Nenhum. Exibe os gráficos e imprime os índices eta² e R².
+    - Nenhum. Exibe os gráficos, índices eta², R² e p-valores do teste ANOVA.
     """
     if target_variable not in df.columns:
         raise ValueError(f"A variável '{target_variable}' não está no DataFrame.")
@@ -50,9 +47,10 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
         # Converter para categórica, se necessário
         df[target_variable] = df[target_variable].astype("category")
 
-        # Calcular eta² e R² para cada variável numérica
+        # Calcular eta², R² e p-valores para cada variável numérica
         eta_squared = {}
         r_squared = {}
+        p_values = {}
         for num_var in comparison_variables:
             if not np.issubdtype(df[num_var].dtype, np.number):
                 continue
@@ -74,6 +72,11 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
             model.fit(X, y)
             y_pred = model.predict(X)
             r_squared[num_var] = r2_score(y, y_pred)
+
+            # Calcular p-valor do ANOVA
+            group_data = [group[1] for group in groups]
+            _, p_value = f_oneway(*group_data)
+            p_values[num_var] = p_value
 
         # Configuração de subplots: 4 gráficos por linha
         num_graphs = len(comparison_variables)
@@ -111,15 +114,16 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
         fig.update_xaxes(title_text=target_variable)
         fig.show()
 
-        # Exibir índices eta² e R²
-        print("Índices Eta² e R² (Associação entre variável categórica e numéricas):")
+        # Exibir índices eta², R² e p-valores do ANOVA
+        print("Índices Eta², R² e p-valores ANOVA (Associação entre variável categórica e numéricas):")
         for var in eta_squared:
-            print(f"{var}: Eta² = {eta_squared[var]}, R² = {r_squared[var]}")
+            print(f"{var}: Eta² = {eta_squared[var]}, R² = {r_squared[var]}, p-valor ANOVA = {p_values[var]}")
 
     elif target_type == "numeric":
         # Para a variável numérica como alvo, calcular eta² com variáveis categóricas
         eta_squared = {}
         r_squared = {}
+        p_values = {}
         for cat_var in comparison_variables:
             if isinstance(df[cat_var].dtype, pd.CategoricalDtype) or pd.api.types.is_object_dtype(df[cat_var]):
                 temp_df = df[[target_variable, cat_var]].dropna()
@@ -140,6 +144,11 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
                 model.fit(X, y)
                 y_pred = model.predict(X)
                 r_squared[cat_var] = r2_score(y, y_pred)
+
+                # Calcular p-valor do ANOVA
+                group_data = [group[1] for group in groups]
+                _, p_value = f_oneway(*group_data)
+                p_values[cat_var] = p_value
 
         # Configuração de subplots: 4 gráficos por linha
         num_graphs = len(comparison_variables)
@@ -177,10 +186,10 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
         fig.update_yaxes(title_text=target_variable)  # Adiciona nome da variável no eixo Y
         fig.show()
 
-        # Exibir índices eta² e R²
-        print("Índices Eta² e R² (Associação entre variável numérica e categóricas):")
+        # Exibir índices eta², R² e p-valores do ANOVA
+        print("Índices Eta², R² e p-valores ANOVA (Associação entre variável numérica e categóricas):")
         for var in eta_squared:
-            print(f"{var}: Eta² = {eta_squared[var]}, R² = {r_squared[var]}")
+            print(f"{var}: Eta² = {eta_squared[var]}, R² = {r_squared[var]}, p-valor ANOVA = {p_values[var]}")
 
     else:
         raise ValueError("O parâmetro 'target_type' deve ser 'categorical' ou 'numeric'.")
