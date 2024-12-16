@@ -17,6 +17,7 @@ from plotly.subplots import make_subplots
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from scipy.stats import f_oneway
+from scipy.stats import pearsonr, spearmanr
 
 def qualitativa_quantitativa(df, target_variable, comparison_variables, target_type="categorical"):
     """
@@ -197,7 +198,7 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
 def quantitativa(df, target_variable, variables_to_compare):
     """
     Analisa a correlação entre uma variável alvo e um conjunto de variáveis específicas,
-    exibindo as correlações de Pearson e Spearman.
+    exibindo as correlações de Pearson e Spearman e seus p-valores.
     Remove valores faltantes apenas para as comparações realizadas, sem modificar o DataFrame original.
 
     Parâmetros:
@@ -206,7 +207,7 @@ def quantitativa(df, target_variable, variables_to_compare):
     - variables_to_compare: Lista de nomes das variáveis a serem comparadas com a variável alvo.
 
     Retorno:
-    - Nenhum. Exibe os gráficos de dispersão organizados e imprime as correlações.
+    - Nenhum. Exibe os gráficos de dispersão organizados e imprime as correlações e p-valores.
     """
     if target_variable not in df.columns:
         raise ValueError(f"A variável '{target_variable}' não está no DataFrame.")
@@ -223,6 +224,8 @@ def quantitativa(df, target_variable, variables_to_compare):
 
     correlations_pearson = {}
     correlations_spearman = {}
+    p_values_pearson = {}
+    p_values_spearman = {}
     num_vars = len(variables_to_compare)
     num_cols = 4  # Número de colunas no layout
     num_rows = -(-num_vars // num_cols)  # Cálculo do número de linhas (arredondamento para cima)
@@ -240,13 +243,15 @@ def quantitativa(df, target_variable, variables_to_compare):
         # Remover valores faltantes antes de calcular correlação
         temp_df = numeric_df[[target_variable, var]].dropna()
 
-        # Correlação de Pearson
-        corr_pearson = temp_df[target_variable].corr(temp_df[var])
+        # Correlação e p-valor de Pearson
+        corr_pearson, p_value_pearson = pearsonr(temp_df[target_variable], temp_df[var])
         correlations_pearson[var] = corr_pearson
+        p_values_pearson[var] = p_value_pearson
 
-        # Correlação de Spearman
-        corr_spearman = temp_df[target_variable].corr(temp_df[var], method='spearman')
+        # Correlação e p-valor de Spearman
+        corr_spearman, p_value_spearman = spearmanr(temp_df[target_variable], temp_df[var])
         correlations_spearman[var] = corr_spearman
+        p_values_spearman[var] = p_value_spearman
 
         scatter = go.Scatter(
             x=temp_df[var],
@@ -274,14 +279,14 @@ def quantitativa(df, target_variable, variables_to_compare):
     # Mostrar gráfico
     fig.show()
 
-    # Exibir índices de correlação
-    print("Índices de Correlação de Pearson (linear):")
+    # Exibir índices de correlação e p-valores
+    print("Índices de Correlação de Pearson (linear) e p-valores:")
     for var, corr in correlations_pearson.items():
-        print(f"{var}: {corr:.2f}")
+        print(f"{var}: Correlação = {corr:.2f}, p-valor = {p_values_pearson[var]:.4f}")
 
-    print("\nÍndices de Correlação de Spearman (não linear):")
+    print("\nÍndices de Correlação de Spearman (não linear) e p-valores:")
     for var, corr in correlations_spearman.items():
-        print(f"{var}: {corr:.2f}")
+        print(f"{var}: Correlação = {corr:.2f}, p-valor = {p_values_spearman[var]:.4f}")
 
 def qualitativa(df, var1, var2, normalize='none', cramers_v=True, chi2_test=True, cohen_kappa=True, handle_missing='drop'):
     """
