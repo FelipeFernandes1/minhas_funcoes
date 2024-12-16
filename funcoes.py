@@ -118,7 +118,7 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
         # Exibir índices eta², R² e p-valores do ANOVA
         print("Índices Eta², R² e p-valores ANOVA (Associação entre variável categórica e numéricas):")
         for var in eta_squared:
-            print(f"{var}: Eta² = {eta_squared[var]}, R² = {r_squared[var]}, p-valor ANOVA = {p_values[var]}")
+            print(f"{var}: Eta² = {eta_squared[var]:.2f}, R² = {r_squared[var]:.2f}, p-valor ANOVA = {p_values[var]:.4f}")
 
     elif target_type == "numeric":
         # Para a variável numérica como alvo, calcular eta² com variáveis categóricas
@@ -190,7 +190,7 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
         # Exibir índices eta², R² e p-valores do ANOVA
         print("Índices Eta², R² e p-valores ANOVA (Associação entre variável numérica e categóricas):")
         for var in eta_squared:
-            print(f"{var}: Eta² = {eta_squared[var]}, R² = {r_squared[var]}, p-valor ANOVA = {p_values[var]}")
+            print(f"{var}: Eta² = {eta_squared[var]:.2f}, R² = {r_squared[var]:.2f}, p-valor ANOVA = {p_values[var]:.4f}")
 
     else:
         raise ValueError("O parâmetro 'target_type' deve ser 'categorical' ou 'numeric'.")
