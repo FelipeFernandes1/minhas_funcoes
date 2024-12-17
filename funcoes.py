@@ -16,23 +16,10 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
-from scipy.stats import f_oneway
+from scipy.stats import f_oneway, kruskal
 from scipy.stats import pearsonr, spearmanr
 
 def qualitativa_quantitativa(df, target_variable, comparison_variables, target_type="categorical"):
-    """
-    Analisa a relação entre uma variável alvo (categórica ou numérica) e um conjunto de variáveis de comparação.
-    Cria gráficos de boxplot com Plotly e calcula o índice eta (η²) e o R² para variáveis numéricas e categóricas.
-
-    Parâmetros:
-    - df: DataFrame pandas contendo os dados.
-    - target_variable: Nome da variável alvo (pode ser categórica ou numérica).
-    - comparison_variables: Lista de nomes das variáveis para comparação (categóricas ou numéricas).
-    - target_type: Tipo da variável alvo ('categorical' ou 'numeric'). Padrão é 'categorical'.
-
-    Retorno:
-    - Nenhum. Exibe os gráficos, índices eta², R² e p-valores do teste ANOVA.
-    """
     if target_variable not in df.columns:
         raise ValueError(f"A variável '{target_variable}' não está no DataFrame.")
 
@@ -40,18 +27,16 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
         raise ValueError("Uma ou mais variáveis especificadas não estão no DataFrame.")
 
     if target_type == "categorical":
-        # Verificar se a variável alvo é categórica
         if not isinstance(df[target_variable].dtype, pd.CategoricalDtype) and \
            not pd.api.types.is_object_dtype(df[target_variable]):
             raise ValueError(f"A variável '{target_variable}' não é categórica.")
 
-        # Converter para categórica, se necessário
         df[target_variable] = df[target_variable].astype("category")
 
-        # Calcular eta², R² e p-valores para cada variável numérica
         eta_squared = {}
         r_squared = {}
-        p_values = {}
+        p_values_anova = {}
+        p_values_kruskal = {}
         for num_var in comparison_variables:
             if not np.issubdtype(df[num_var].dtype, np.number):
                 continue
@@ -59,14 +44,11 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
             groups = temp_df.groupby(target_variable, observed=True)[num_var]
             overall_mean = temp_df[num_var].mean()
 
-            # Variância entre os grupos
             ss_between = sum(groups.size() * (groups.mean() - overall_mean) ** 2)
-            # Variância total
             ss_total = sum((temp_df[num_var] - overall_mean) ** 2)
 
             eta_squared[num_var] = ss_between / ss_total
 
-            # Calcular R² (coeficiente de determinação)
             X = pd.get_dummies(temp_df[target_variable], drop_first=True)
             y = temp_df[num_var]
             model = LinearRegression()
@@ -74,22 +56,21 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
             y_pred = model.predict(X)
             r_squared[num_var] = r2_score(y, y_pred)
 
-            # Calcular p-valor do ANOVA
             group_data = [group[1] for group in groups]
-            _, p_value = f_oneway(*group_data)
-            p_values[num_var] = p_value
+            _, p_value_anova = f_oneway(*group_data)
+            p_values_anova[num_var] = p_value_anova
 
-        # Configuração de subplots: 4 gráficos por linha
+            _, p_value_kruskal = kruskal(*group_data)
+            p_values_kruskal[num_var] = p_value_kruskal
+
         num_graphs = len(comparison_variables)
-        rows = (num_graphs - 1) // 4 + 1  # Calcula o número de linhas necessárias
-        cols = 4  # Quatro gráficos por linha
+        rows = (num_graphs - 1) // 4 + 1
+        cols = 4
 
-        # Criar subgráficos sem títulos
         fig = make_subplots(
-            rows=rows, cols=cols, subplot_titles=[]  # Removendo os títulos dos subgráficos
+            rows=rows, cols=cols, subplot_titles=[]
         )
 
-        # Adicionar gráficos
         for idx, num_var in enumerate(comparison_variables):
             if not np.issubdtype(df[num_var].dtype, np.number):
                 continue
@@ -105,40 +86,35 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
 
             fig.update_yaxes(title_text=num_var, row=row, col=col)
 
-        # Layout final
         fig.update_layout(
-            height=300 * rows,  # Ajusta altura com base no número de linhas
-            title_text=f"Gráficos de {target_variable} com variáveis numéricas",  # Título do gráfico
+            height=300 * rows,
+            title_text=f"Gráficos de {target_variable} com variáveis numéricas",
             showlegend=False,
             template="plotly_white"
         )
         fig.update_xaxes(title_text=target_variable)
         fig.show()
 
-        # Exibir índices eta², R² e p-valores do ANOVA
-        print("Índices Eta², R² e p-valores ANOVA (Associação entre variável categórica e numéricas):")
+        print("Índices Eta², R², p-valores ANOVA e p-valores Kruskal (Associação entre variável categórica e numéricas):")
         for var in eta_squared:
-            print(f"{var}: Eta² = {eta_squared[var]:.2f}, R² = {r_squared[var]:.2f}, p-valor ANOVA = {p_values[var]:.4f}")
+            print(f"{var}: Eta² = {eta_squared[var]:.2f}, R² = {r_squared[var]:.2f}, p-valor ANOVA = {p_values_anova[var]:.4f}, p-valor Kruskal = {p_values_kruskal[var]:.4f}")
 
     elif target_type == "numeric":
-        # Para a variável numérica como alvo, calcular eta² com variáveis categóricas
         eta_squared = {}
         r_squared = {}
-        p_values = {}
+        p_values_anova = {}
+        p_values_kruskal = {}
         for cat_var in comparison_variables:
             if isinstance(df[cat_var].dtype, pd.CategoricalDtype) or pd.api.types.is_object_dtype(df[cat_var]):
                 temp_df = df[[target_variable, cat_var]].dropna()
                 groups = temp_df.groupby(cat_var, observed=True)[target_variable]
                 overall_mean = temp_df[target_variable].mean()
 
-                # Variância entre os grupos
                 ss_between = sum(groups.size() * (groups.mean() - overall_mean) ** 2)
-                # Variância total
                 ss_total = sum((temp_df[target_variable] - overall_mean) ** 2)
 
                 eta_squared[cat_var] = ss_between / ss_total
 
-                # Calcular R² (coeficiente de determinação)
                 X = pd.get_dummies(temp_df[cat_var], drop_first=True)
                 y = temp_df[target_variable]
                 model = LinearRegression()
@@ -146,22 +122,21 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
                 y_pred = model.predict(X)
                 r_squared[cat_var] = r2_score(y, y_pred)
 
-                # Calcular p-valor do ANOVA
                 group_data = [group[1] for group in groups]
-                _, p_value = f_oneway(*group_data)
-                p_values[cat_var] = p_value
+                _, p_value_anova = f_oneway(*group_data)
+                p_values_anova[cat_var] = p_value_anova
 
-        # Configuração de subplots: 4 gráficos por linha
+                _, p_value_kruskal = kruskal(*group_data)
+                p_values_kruskal[cat_var] = p_value_kruskal
+
         num_graphs = len(comparison_variables)
-        rows = (num_graphs - 1) // 4 + 1  # Calcula o número de linhas necessárias
-        cols = 4  # Quatro gráficos por linha
+        rows = (num_graphs - 1) // 4 + 1
+        cols = 4
 
-        # Criar subgráficos sem títulos
         fig = make_subplots(
-            rows=rows, cols=cols, subplot_titles=[]  # Removendo os títulos dos subgráficos
+            rows=rows, cols=cols, subplot_titles=[]
         )
 
-        # Adicionar gráficos
         for idx, cat_var in enumerate(comparison_variables):
             if not (isinstance(df[cat_var].dtype, pd.CategoricalDtype) or pd.api.types.is_object_dtype(df[cat_var])):
                 continue
@@ -177,20 +152,18 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
 
             fig.update_xaxes(title_text=cat_var, row=row, col=col)
 
-        # Layout final
         fig.update_layout(
-            height=300 * rows,  # Ajusta altura com base no número de linhas
-            title_text=f"Gráficos de {target_variable} com variáveis categóricas",  # Título do gráfico
+            height=300 * rows,
+            title_text=f"Gráficos de {target_variable} com variáveis categóricas",
             showlegend=False,
             template="plotly_white"
         )
-        fig.update_yaxes(title_text=target_variable)  # Adiciona nome da variável no eixo Y
+        fig.update_yaxes(title_text=target_variable)
         fig.show()
 
-        # Exibir índices eta², R² e p-valores do ANOVA
-        print("Índices Eta², R² e p-valores ANOVA (Associação entre variável numérica e categóricas):")
+        print("Índices Eta², R², p-valores ANOVA e p-valores Kruskal (Associação entre variável numérica e categóricas):")
         for var in eta_squared:
-            print(f"{var}: Eta² = {eta_squared[var]:.2f}, R² = {r_squared[var]:.2f}, p-valor ANOVA = {p_values[var]:.4f}")
+            print(f"{var}: Eta² = {eta_squared[var]:.2f}, R² = {r_squared[var]:.2f}, p-valor ANOVA = {p_values_anova[var]:.4f}, p-valor Kruskal = {p_values_kruskal[var]:.4f}")
 
     else:
         raise ValueError("O parâmetro 'target_type' deve ser 'categorical' ou 'numeric'.")
@@ -383,14 +356,12 @@ def qualitativa(df, var1, var2, normalize='none', cramers_v=True, chi2_test=True
             aspect="auto",
             color_continuous_scale="Viridis"
         )
+        # Adicionando o tamanho do gráfico
         fig.update_layout(
             title=f"Mapa de Calor entre {var1} e {v} (Normalização: {normalize})",
             xaxis_title=var1,
-            yaxis_title=v
+            yaxis_title=v,
+            width=600,  # Largura do gráfico
+            height=400  # Altura do gráfico
         )
         fig.show()
-
-
-
-
-
