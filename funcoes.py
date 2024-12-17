@@ -88,7 +88,7 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
 
         fig.update_layout(
             height=300 * rows,
-            title_text=f"Gráficos de {target_variable} com variáveis numéricas",
+            #title_text=f"Gráficos de {target_variable} com variáveis numéricas",
             showlegend=False,
             template="plotly_white"
         )
@@ -154,7 +154,7 @@ def qualitativa_quantitativa(df, target_variable, comparison_variables, target_t
 
         fig.update_layout(
             height=300 * rows,
-            title_text=f"Gráficos de {target_variable} com variáveis categóricas",
+            #title_text=f"Gráficos de {target_variable} com variáveis categóricas",
             showlegend=False,
             template="plotly_white"
         )
@@ -244,7 +244,7 @@ def quantitativa(df, target_variable, variables_to_compare):
     fig.update_layout(
         height=300 * num_rows,  # Ajustar altura do gráfico
         width=1200,  # Largura fixa
-        title_text=f"Análise de Correlação com {target_variable}",
+        #title_text=f"Análise de Correlação com {target_variable}",
         showlegend=False,
         template="plotly_white"
     )
