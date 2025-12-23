@@ -44,7 +44,7 @@ def bivariada_cat_num(df, show_graphs=True, p_value_only=True):
 
     for col in set(cols_data):
         df_analise[f'{col}_Ano'] = df_analise[col].dt.year.astype(str)
-        df_analise[f'{col}_Mes'] = df_analise[col].dt.month_name()
+        df_analise[f'{col}_Mes'] = df_analise[col].dt.strftime('%m/%Y')
         df_analise[f'{col}_Dia_Semana'] = df_analise[col].dt.day_name()
 
     # --- 2. IDENTIFICAÇÃO DE VARIÁVEIS ---
@@ -240,7 +240,7 @@ def bivariada_cat_cat(df, show_graphs=True, normalize='none', handle_missing='dr
     # Cria categorias temporais
     for col in set(cols_data):
         df_analise[f'{col}_Ano'] = df_analise[col].dt.year.astype(str)
-        df_analise[f'{col}_Mes'] = df_analise[col].dt.month_name()
+        df_analise[f'{col}_Mes'] = df_analise[col].dt.strftime('%m/%Y')
         df_analise[f'{col}_Dia_Semana'] = df_analise[col].dt.day_name()
 
     # --- 2. IDENTIFICAÇÃO DE VARIÁVEIS CATEGÓRICAS ATUALIZADA ---
