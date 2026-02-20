@@ -20,6 +20,8 @@ from sklearn.metrics import cohen_kappa_score
 import matplotlib.pyplot as plt
 import seaborn as sns
 import math
+from scipy import stats
+from statsmodels.tsa.stattools import adfuller, acf
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -402,3 +404,205 @@ def univariada(df):
                 print("Variável numérica sem dados válidos para plotagem.")
 
         print("\n" + " " * 60 + "\n") # Espaço entre variáveis
+
+
+def analise_temporal_automatica(
+    df,
+    coluna_data,
+    nivel="ano",  # "ano", "ano_mes", "ano_mes_dia"
+    rolling_window=3
+):
+    
+    df = df.copy()
+    df[coluna_data] = pd.to_datetime(df[coluna_data])
+    
+    # =====================================
+    # 🔎 Identificar colunas numéricas
+    # =====================================
+    
+    colunas_numericas = df.select_dtypes(include=np.number).columns.tolist()
+    
+    if not colunas_numericas:
+        raise ValueError("Nenhuma coluna numérica encontrada no DataFrame.")
+    
+    print(f"\nColunas numéricas identificadas: {colunas_numericas}\n")
+    
+    # =====================================
+    # 🔁 Loop para cada variável numérica
+    # =====================================
+    
+    for coluna_valor in colunas_numericas:
+        
+        print("\n" + "#"*80)
+        print(f"ANÁLISE DA VARIÁVEL: {coluna_valor.upper()}")
+        print("#"*80)
+        
+        # =========================
+        # 1️⃣ Agregação
+        # =========================
+        
+        if nivel == "ano":
+            df_agg = df.groupby(df[coluna_data].dt.year)[coluna_valor].sum()
+            unidade = "ano"
+            
+        elif nivel == "ano_mes":
+            df_agg = df.groupby(df[coluna_data].dt.to_period("M"))[coluna_valor].sum()
+            df_agg.index = df_agg.index.to_timestamp()
+            unidade = "mês"
+            
+        elif nivel == "ano_mes_dia":
+            df_agg = df.groupby(df[coluna_data].dt.date)[coluna_valor].sum()
+            df_agg.index = pd.to_datetime(df_agg.index)
+            unidade = "dia"
+            
+        else:
+            raise ValueError("nivel deve ser: 'ano', 'ano_mes' ou 'ano_mes_dia'")
+        
+        df_agg = df_agg.sort_index()
+        
+        serie = df_agg
+        y = serie.values
+        tempo = np.arange(len(serie))
+        
+        if len(y) < 3:
+            print("Série muito curta para análise estatística.")
+            continue
+        
+        # =========================
+        # 2️⃣ Rolling mean
+        # =========================
+        
+        y_smooth = pd.Series(y, index=serie.index).rolling(rolling_window).mean()
+        
+        # =========================
+        # 3️⃣ Mann-Kendall
+        # =========================
+        
+        if mk:
+            try:
+                teste_mk = mk.hamed_rao_modification_test(y)
+            except:
+                teste_mk = mk.original_test(y)
+            resultado_mk = teste_mk.trend
+            p_mk = teste_mk.p
+        else:
+            resultado_mk = "indisponível"
+            p_mk = np.nan
+        
+        # =========================
+        # 4️⃣ Regressão linear
+        # =========================
+        
+        slope, intercept, r_val, p_val, std_err = stats.linregress(tempo, y)
+        r_quadrado = r_val**2
+        crescimento_pct = (slope / np.mean(y)) * 100 if np.mean(y) != 0 else 0
+        
+        # =========================
+        # 5️⃣ ADF e Autocorrelação
+        # =========================
+        
+        try:
+            adf_p = adfuller(y)[1]
+        except:
+            adf_p = np.nan
+        
+        try:
+            autocorr_lag1 = acf(y, nlags=1)[1]
+        except:
+            autocorr_lag1 = np.nan
+        
+        # =========================
+        # 6️⃣ Plotagem
+        # =========================
+        
+        plt.figure(figsize=(9,4))
+        sns.set_style("whitegrid")
+        
+        sns.lineplot(x=serie.index, y=y, marker='o', linewidth=2.5, label='Série Observada')
+        plt.plot(serie.index, y_smooth, linewidth=2, alpha=0.7,
+                 label=f'Média Móvel ({rolling_window})')
+        
+        plt.plot(serie.index,
+                 intercept + slope * tempo,
+                 'r--',
+                 label=f'Tendência Linear (R²={r_quadrado:.2f})')
+        
+        plt.title(f'Análise Temporal ({nivel}) - {coluna_valor.upper()}')
+        plt.xlabel("Tempo")
+        plt.ylabel(coluna_valor.capitalize())
+        
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+        
+        # =========================
+        # 7️⃣ INTERPRETAÇÃO ANALÍTICA (MODELO EXPANDIDO)
+        # =========================
+        
+        print("\n" + "="*70)
+        print(f"INTERPRETAÇÃO ESTATÍSTICA – {coluna_valor.upper()} ({nivel.upper()})")
+        print("="*70)
+        
+        # 1️⃣ Tendência
+        if not np.isnan(p_mk):
+            print("\n1️⃣ Tendência (Mann-Kendall)")
+            if p_mk < 0.05:
+                print(f"O teste indica tendência estatisticamente significativa de {resultado_mk.lower()} (p={p_mk:.4f}).")
+                print("Isso sugere que o comportamento da série não é aleatório, havendo direção consistente ao longo do tempo.")
+            else:
+                print(f"Não há evidência estatística suficiente de tendência (p={p_mk:.4f}).")
+        
+        # 2️⃣ Crescimento
+        print("\n2️⃣ Magnitude do Crescimento")
+        print(f"O crescimento médio estimado é de {slope:,.2f} por {unidade}.")
+        print(f"Em termos relativos, isso representa aproximadamente {crescimento_pct:.2f}% ao {unidade}.")
+        
+        if crescimento_pct > 10:
+            print("Trata-se de um crescimento estrutural elevado.")
+        elif crescimento_pct > 3:
+            print("O crescimento pode ser considerado moderado.")
+        else:
+            print("O crescimento é relativamente baixo.")
+        
+        # 3️⃣ Ajuste da tendência
+        print("\n3️⃣ Ajuste do Modelo Linear")
+        print(f"O modelo linear apresenta R² de {r_quadrado:.2%},")
+        print("indicando a proporção da variação temporal explicada por uma tendência linear.")
+        
+        # 4️⃣ Estacionariedade
+        print("\n4️⃣ Estacionariedade (Teste ADF)")
+        if not np.isnan(adf_p):
+            if adf_p < 0.05:
+                print(f"O teste ADF indica estacionariedade (p={adf_p:.4f}).")
+                print("Isso sugere que a série oscila em torno de uma média estável ao longo do tempo.")
+            else:
+                print(f"O teste ADF não rejeita a hipótese de raiz unitária (p={adf_p:.4f}).")
+                print("Portanto, a série apresenta comportamento não estacionário,")
+                print("compatível com tendência estrutural ou crescimento persistente.")
+        
+        # 5️⃣ Dependência temporal
+        print("\n5️⃣ Dependência Temporal")
+        if not np.isnan(autocorr_lag1):
+            print(f"A autocorrelação de primeira ordem é {autocorr_lag1:.2f}.")
+            
+            if autocorr_lag1 > 0.7:
+                print("O valor é elevado, indicando forte persistência temporal.")
+                print("Isso significa que os valores atuais dependem fortemente do período anterior.")
+            elif autocorr_lag1 > 0.4:
+                print("Há persistência temporal moderada entre períodos consecutivos.")
+            else:
+                print("A dependência temporal é baixa.")
+        
+        # 6️⃣ Diagnóstico Final
+        print("\nConclusão Geral")
+        
+        if p_mk < 0.05 and crescimento_pct > 5:
+            print("Os resultados apontam evidência robusta de crescimento estrutural consistente.")
+        
+        if adf_p > 0.05:
+            print("A série apresenta comportamento não estacionário, sugerindo dinâmica evolutiva ao longo do tempo.")
+        
+        if autocorr_lag1 > 0.7:
+            print("Observa-se alta memória temporal, característica de processos persistentes.")
+        
+        print("="*70)
