@@ -22,6 +22,10 @@ import seaborn as sns
 import math
 from scipy import stats
 from statsmodels.tsa.stattools import adfuller, acf
+try:
+    import pymannkendall as mk
+except ImportError:
+    mk = None
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
